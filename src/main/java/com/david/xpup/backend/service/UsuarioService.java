@@ -1,16 +1,25 @@
 package com.david.xpup.backend.service;
 
-import com.david.xpup.backend.repository.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.david.xpup.generated.model.InternalPostSummaryResponse;
+import com.david.xpup.generated.model.InternalUserProfileResponse;
+import com.david.xpup.generated.model.InternalUserSummaryResponse;
+import com.david.xpup.generated.model.InternalUserUpdateRequest;
 
-@Service
-@RequiredArgsConstructor
-public class UsuarioService {
-    private final UsuarioRepository usuarioRepository;
-    private final PublicacionRepository publicacionRepository;
-    private final SeguimientoRepository seguimientoRepository;
-    private final ExperienciaRepository experienciaRepository;
-    private final LikeRepository likeRepository;
-    private final GuardadoRepository guardadoRepository;
+import java.util.List;
+
+public interface UsuarioService {
+
+    InternalUserProfileResponse getUserProfile(Integer userId);
+
+    InternalUserProfileResponse updateUserProfile(Integer userId, InternalUserUpdateRequest request);
+
+    List<InternalPostSummaryResponse> getUserPosts(Integer userId);
+
+    List<InternalPostSummaryResponse> getUserLikedPosts(Integer userId);
+
+    List<InternalPostSummaryResponse> getUserSavedPosts(Integer userId);
+
+    List<InternalUserSummaryResponse> getUserFollowing(Integer userId);
+
+    List<InternalUserSummaryResponse> getUserFollowers(Integer userId);
 }

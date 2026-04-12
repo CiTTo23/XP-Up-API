@@ -8,7 +8,7 @@ import com.david.xpup.generated.model.InternalUserProfileResponse;
 import com.david.xpup.generated.model.InternalUserSummaryResponse;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Component
 public class UsuarioMapper {
@@ -36,7 +36,7 @@ public class UsuarioMapper {
         response.setFotoPerfil(usuario.getFotoPerfil());
         response.setBiografia(usuario.getBiografia());
         response.setRol(usuario.getRol());
-        response.setFechaRegistro(OffsetDateTime.from(usuario.getFechaRegistro()));
+        response.setFechaRegistro(usuario.getFechaRegistro().atOffset(ZoneOffset.UTC));
         response.setXpTotal(experiencia != null ? experiencia.getXpTotal() : 0);
         response.setNivel(experiencia != null ? experiencia.getNivel() : 1);
         response.setTotalSeguidores((int) totalSeguidores);
@@ -63,7 +63,7 @@ public class UsuarioMapper {
         response.setMiniaturaUrl(publicacion.getMiniaturaUrl());
         response.setNombreJuego(publicacion.getNombreJuego());
         response.setPortadaJuegoUrl(publicacion.getPortadaJuegoUrl());
-        response.setFechaPublicacion(OffsetDateTime.from(publicacion.getFechaPublicacion()));
+        response.setFechaPublicacion(publicacion.getFechaPublicacion().atOffset(ZoneOffset.UTC));
         response.setTotalLikes((int) totalLikes);
         response.setTotalComentarios((int) totalComentarios);
         response.setLikedByUser(likedByUser);

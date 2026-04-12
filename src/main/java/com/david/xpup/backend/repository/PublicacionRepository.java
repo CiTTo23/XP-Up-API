@@ -23,4 +23,7 @@ public interface PublicacionRepository extends JpaRepository<Publicacion, Intege
             String nombreJuego,
             Pageable pageable
     );
+
+    long countByUsuario(Usuario usuario);
+
 }
