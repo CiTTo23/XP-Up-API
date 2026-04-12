@@ -6,7 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comentarios")
+@Table(name = "comentarios", indexes = {
+        @Index(name = "idx_comentario_usuario", columnList = "id_usuario"),
+        @Index(name = "idx_comentario_publicacion", columnList = "id_publicacion")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,11 +22,11 @@ public class Comentario {
     @Column(name = "id_comentario")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_publicacion", nullable = false)
     private Publicacion publicacion;
 

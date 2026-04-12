@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface GuardadoRepository extends JpaRepository<Guardado, Integer> {
 
-    List<Guardado> findByUsuario(Usuario usuario);
+    List<Guardado> findByUsuarioOrderByFechaGuardadoDesc(Usuario usuario);
 
     List<Guardado> findByPublicacion(Publicacion publicacion);
 
@@ -19,4 +19,6 @@ public interface GuardadoRepository extends JpaRepository<Guardado, Integer> {
     boolean existsByUsuarioAndPublicacion(Usuario usuario, Publicacion publicacion);
 
     void deleteByUsuarioAndPublicacion(Usuario usuario, Publicacion publicacion);
+
+    long countByPublicacion(Publicacion publicacion);
 }

@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface ComentarioRepository extends JpaRepository<Comentario, Integer> {
 
-    List<Comentario> findByPublicacion(Publicacion publicacion);
-
     List<Comentario> findByPublicacionOrderByFechaComentarioAsc(Publicacion publicacion);
 
     List<Comentario> findByUsuario(Usuario usuario);
+
+    long countByPublicacion(Publicacion publicacion);
 }

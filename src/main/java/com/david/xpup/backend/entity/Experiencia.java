@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "experiencia")
+@Table(name = "experiencia", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_experiencia_usuario", columnNames = "id_usuario")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,8 +19,8 @@ public class Experiencia {
     @Column(name = "id_experiencia")
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", nullable = false, unique = true)
     private Usuario usuario;
 
     @Column(name = "xp_total", nullable = false)

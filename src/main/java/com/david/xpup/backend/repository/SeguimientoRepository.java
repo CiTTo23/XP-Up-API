@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public interface SeguimientoRepository extends JpaRepository<Seguimiento, Integer> {
 
-    List<Seguimiento> findBySeguidor(Usuario seguidor);
+    List<Seguimiento> findBySeguidorOrderByFechaSeguimientoDesc(Usuario seguidor);
 
-    List<Seguimiento> findBySeguido(Usuario seguido);
+    List<Seguimiento> findBySeguidoOrderByFechaSeguimientoDesc(Usuario seguido);
 
     Optional<Seguimiento> findBySeguidorAndSeguido(Usuario seguidor, Usuario seguido);
 

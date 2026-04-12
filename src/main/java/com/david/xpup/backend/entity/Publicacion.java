@@ -6,7 +6,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "publicaciones")
+@Table(name = "publicaciones", indexes = {
+        @Index(name = "idx_publicacion_usuario", columnList = "id_usuario"),
+        @Index(name = "idx_publicacion_nombre_juego", columnList = "nombre_juego"),
+        @Index(name = "idx_publicacion_fecha", columnList = "fecha_publicacion")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +23,7 @@ public class Publicacion {
     @Column(name = "id_publicacion")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 

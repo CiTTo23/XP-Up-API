@@ -6,7 +6,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "seguimientos")
+@Table(name = "seguimientos",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_seguimiento_seguidor_seguido", columnNames = {"id_seguidor", "id_seguido"})
+        },
+        indexes = {
+                @Index(name = "idx_seguimiento_seguidor", columnList = "id_seguidor"),
+                @Index(name = "idx_seguimiento_seguido", columnList = "id_seguido")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,11 +27,11 @@ public class Seguimiento {
     @Column(name = "id_seguimiento")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_seguidor", nullable = false)
     private Usuario seguidor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_seguido", nullable = false)
     private Usuario seguido;
 

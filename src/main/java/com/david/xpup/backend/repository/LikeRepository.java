@@ -12,11 +12,13 @@ public interface LikeRepository extends JpaRepository<Like, Integer> {
 
     List<Like> findByPublicacion(Publicacion publicacion);
 
-    List<Like> findByUsuario(Usuario usuario);
+    List<Like> findByUsuarioOrderByFechaLikeDesc(Usuario usuario);
 
     Optional<Like> findByUsuarioAndPublicacion(Usuario usuario, Publicacion publicacion);
 
     boolean existsByUsuarioAndPublicacion(Usuario usuario, Publicacion publicacion);
+
+    void deleteByUsuarioAndPublicacion(Usuario usuario, Publicacion publicacion);
 
     long countByPublicacion(Publicacion publicacion);
 }

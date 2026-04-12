@@ -6,7 +6,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "guardados")
+@Table(name = "guardados",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_guardado_usuario_publicacion", columnNames = {"id_usuario", "id_publicacion"})
+        },
+        indexes = {
+                @Index(name = "idx_guardado_usuario", columnList = "id_usuario"),
+                @Index(name = "idx_guardado_publicacion", columnList = "id_publicacion")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,11 +27,11 @@ public class Guardado {
     @Column(name = "id_guardado")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_publicacion", nullable = false)
     private Publicacion publicacion;
 
