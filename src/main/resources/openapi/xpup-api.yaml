@@ -1,0 +1,1873 @@
+openapi: 3.0.0
+info:
+  title: XP-Up API
+  version: 1.0.0
+  description: API REST para la plataforma XP-Up
+  contact:
+    name: David Martinez Lopez
+    email: dmljm2013@gmail.com
+
+servers:
+  - url: http://localhost:8080
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Endpoints destinados al registro, autenticación y cierre de sesión de usuarios.
+  - name: Usuarios
+    description: Endpoints destinados a la gestión del usuario del sistema XP-Up. Abarca la obtención  actualización de datos de los mismos.
+  - name: Publicaciones
+    description: Endpoints destinados a la subida, obtención y eliminación de publicaciones en el sistema XP-Up.
+  - name: Feed
+    description: Endpoints destinados a la obtención del feed de publicaciones que se mostrará a los usuarios en el sistema XP-Up.
+  - name: Comentarios
+    description: Endpoints destinados a la subida y obtención de los comentarios de cada una de las publicaciones en el sistema XP-Up.
+  - name: Likes
+    description: Endpoints destinados a la subida y obtención de los likes de cada una de las publicaciones en el sistema XP-Up.
+  - name: Guardados
+    description: Endpoints destinados a la marcación y desmarcación de las publicaciones como "guardadas" del usuario en el sistema XP-Up.
+  - name: Seguimientos
+    description: Endpoints destinados a la gestión de los seguimientos entre usuarios en el sistema XP-Up.
+  - name: Experiencia
+    description: Endpoints destinados a la gestión de la experiencia y nivel de los usuarios en el sistema XP-Up.
+  - name: Videojuegos
+    description: Endpoints destinados a la búsqueda y consulta de videojuegos desde una API externa.
+
+
+paths:
+  # =========================
+  # AUTH
+  # =========================
+
+  /api/auth/register:
+    post:
+      operationId: registerUser
+      tags:
+        - Auth
+      summary: Registrar nuevo usuario
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
+      responses:
+        "201":
+          description: Usuario registrado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthRegisterResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "409":
+          description: El nombre de usuario o el email ya están en uso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/auth/login:
+    post:
+      operationId: loginUser
+      tags:
+        - Auth
+      summary: Iniciar sesión
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        "200":
+          description: Login correcto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Credenciales incorrectas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/auth/logout:
+    post:
+      operationId: logoutUser
+      tags:
+        - Auth
+      summary: Cerrar sesión
+      responses:
+        "200":
+          description: Sesión cerrada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # USERS
+  # =========================
+
+  /api/users/{userId}:
+    get:
+      operationId: getUserProfile
+      tags:
+        - Usuarios
+      summary: Obtener perfil de usuario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Perfil de usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalUserProfileResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    put:
+      operationId: updateUserProfile
+      tags:
+        - Usuarios
+      summary: Editar perfil
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalUserUpdateRequest'
+      responses:
+        "200":
+          description: Usuario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalUserProfileResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "409":
+          description: Nombre de usuario ya en uso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/users/{userId}/posts:
+    get:
+      operationId: getUserPosts
+      tags:
+        - Usuarios
+      summary: Obtener publicaciones de un usuario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Lista de publicaciones del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalPostListResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/users/{userId}/likes:
+    get:
+      operationId: getUserLikedPosts
+      tags:
+        - Usuarios
+      summary: Obtener publicaciones con like de un usuario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Lista de publicaciones con like del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalPostListResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/users/{userId}/saved:
+    get:
+      operationId: getUserSavedPosts
+      tags:
+        - Usuarios
+      summary: Obtener publicaciones guardadas de un usuario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Lista de publicaciones guardadas del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalPostListResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/users/{userId}/following:
+    get:
+      operationId: getUserFollowing
+      tags:
+        - Usuarios
+      summary: Obtener usuarios seguidos por un usuario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Lista de usuarios seguidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalUserListResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/users/{userId}/followers:
+    get:
+      operationId: getUserFollowers
+      tags:
+        - Usuarios
+      summary: Obtener seguidores de un usuario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Lista de seguidores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalUserListResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # POSTS
+  # =========================
+
+  /api/posts:
+    post:
+      operationId: createPost
+      tags:
+        - Publicaciones
+      summary: Crear publicación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalPostRequest'
+      responses:
+        "201":
+          description: Publicación creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalPostCreateResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/posts/{postId}:
+    get:
+      operationId: getPostById
+      tags:
+        - Publicaciones
+      summary: Obtener detalle de publicación
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Detalle de publicación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalPostDetailResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Publicacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+    delete:
+      operationId: deletePost
+      tags:
+        - Publicaciones
+      summary: Eliminar publicación
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Publicación eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Publicacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # FEED
+  # =========================
+
+  /api/feed:
+    get:
+      operationId: getFeed
+      tags:
+        - Feed
+      summary: Obtener feed general
+      parameters:
+        - name: orden
+          in: query
+          required: false
+          description: Criterio de ordenación del feed.
+          schema:
+            type: string
+            enum: [fecha, popularidad]
+            example: fecha
+        - name: page
+          in: query
+          required: false
+          description: Número de página.
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - name: size
+          in: query
+          required: false
+          description: Número de elementos por página.
+          schema:
+            type: integer
+            minimum: 1
+            example: 10
+        - name: nombreJuego
+          in: query
+          required: false
+          description: Filtrar publicaciones por nombre del videojuego asociado.
+          schema:
+            type: string
+            minLength: 2
+            example: Valorant
+      responses:
+        "200":
+          description: Lista paginada de publicaciones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalPagedPostResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/feed/following/{userId}:
+    get:
+      operationId: getFollowingFeed
+      tags:
+        - Feed
+      summary: Feed de seguidos
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+        - name: orden
+          in: query
+          required: false
+          description: Criterio de ordenación del feed de seguidos.
+          schema:
+            type: string
+            enum: [fecha, popularidad]
+            example: fecha
+        - name: page
+          in: query
+          required: false
+          description: Número de página.
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - name: size
+          in: query
+          required: false
+          description: Número de elementos por página.
+          schema:
+            type: integer
+            minimum: 1
+            example: 10
+      responses:
+        "200":
+          description: Lista paginada de publicaciones de usuarios seguidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalPagedPostResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+  # =========================
+  # COMMENTS
+  # =========================
+
+  /api/comments:
+    post:
+      operationId: createComment
+      tags:
+        - Comentarios
+      summary: Crear comentario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalCommentRequest'
+      responses:
+        "201":
+          description: Comentario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalCommentResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/comments/post/{postId}:
+    get:
+      operationId: getCommentsByPost
+      tags:
+        - Comentarios
+      summary: Obtener comentarios de una publicación
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Lista de comentarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalCommentListResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Publicacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # LIKES
+  # =========================
+
+  /api/likes:
+    post:
+      operationId: likePost
+      tags:
+        - Likes
+      summary: Dar like
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalLikeRequest'
+      responses:
+        "200":
+          description: Like añadido correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "409":
+          description: Like ya existente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      operationId: unlikePost
+      tags:
+        - Likes
+      summary: Quitar like
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalLikeRequest'
+      responses:
+        "200":
+          description: Like eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/likes/post/{postId}:
+    get:
+      operationId: getPostLikesCount
+      tags:
+        - Likes
+      summary: Obtener número de likes
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Total de likes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalLikesCountResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Publicacion no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/likes/check:
+    get:
+      operationId: checkUserLike
+      tags:
+        - Likes
+      summary: Comprobar si un usuario ha dado like a una publicación
+      parameters:
+        - name: idUsuario
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+        - name: idPublicacion
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Resultado de la comprobación de like
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalLikeCheckResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # SAVED
+  # =========================
+
+  /api/saved:
+    post:
+      operationId: savePost
+      tags:
+        - Guardados
+      summary: Guardar publicación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalLikeRequest'
+      responses:
+        "200":
+          description: Guardado añadido correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "409":
+          description: Guardado ya existente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      operationId: unsavePost
+      tags:
+        - Guardados
+      summary: Quitar guardado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalLikeRequest'
+      responses:
+        "200":
+          description: Guardado eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/saved/check:
+    get:
+      operationId: checkUserSavedPost
+      tags:
+        - Guardados
+      summary: Comprobar si un usuario ha guardado una publicación
+      parameters:
+        - name: idUsuario
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+        - name: idPublicacion
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Resultado de la comprobación de guardado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalSavedCheckResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+  # =========================
+  # FOLLOWS
+  # =========================
+
+  /api/follows:
+    post:
+      operationId: followUser
+      tags:
+        - Seguimientos
+      summary: Seguir usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalFollowRequest'
+      responses:
+        "200":
+          description: Usuario seguido correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "409":
+          description: Seguimiento ya existente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      operationId: unfollowUser
+      tags:
+        - Seguimientos
+      summary: Dejar de seguir
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalFollowRequest'
+      responses:
+        "200":
+          description: Usuario dejado de seguir correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/follows/check:
+    get:
+      operationId: checkUserFollow
+      tags:
+        - Seguimientos
+      summary: Comprobar si un usuario sigue a otro usuario
+      parameters:
+        - name: idSeguidor
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+        - name: idSeguido
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Resultado de la comprobación de seguimiento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalFollowCheckResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/follows/stats/{userId}:
+    get:
+      operationId: getFollowStats
+      tags:
+        - Seguimientos
+      summary: Obtener estadísticas de seguimiento de un usuario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Estadísticas de seguimiento del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalFollowStatsResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # EXPERIENCE
+  # =========================
+
+  /api/experience/{userId}:
+    get:
+      operationId: getUserExperience
+      tags:
+        - Experiencia
+      summary: Obtener experiencia
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Experiencia del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalExperienceResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+    put:
+      operationId: updateUserExperience
+      tags:
+        - Experiencia
+      summary: Actualizar experiencia
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalExperienceRequest'
+      responses:
+        "200":
+          description: Experiencia actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalExperienceResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+  # =========================
+  # GAMES
+  # =========================
+
+  /api/games/search:
+    get:
+      operationId: searchGames
+      tags:
+        - Videojuegos
+      summary: Buscar videojuegos mediante API externa
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: Texto de búsqueda del videojuego.
+          schema:
+            type: string
+            minLength: 2
+            example: valorant
+      responses:
+        "200":
+          description: Lista de videojuegos encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalGameListResponse'
+        "400":
+          description: Parámetro de búsqueda inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+# =========================
+# COMPONENTS (DTOs)
+# =========================
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    InternalUserId:
+      type: integer
+      description: Identificador único de un usuario dentro del sistema.
+      example: 123
+
+    InternalPostId:
+      type: integer
+      description: Identificador único de una publicación dentro del sistema.
+      example: 321
+
+    InternalUserProfileResponse:
+      type: object
+      description: Información completa del perfil de un usuario incluyendo datos personales, progreso y estadísticas sociales.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalUserId'
+        nombreUsuario:
+          type: string
+          description: Nombre visible del usuario en la plataforma.
+          example: david_pro
+        email:
+          type: string
+          description: Correo electrónico del usuario.
+          example: david@gmail.com
+        fotoPerfil:
+          type: string
+          description: URL de la imagen de perfil.
+          example: 'https://xpup.com/img/perfil1.jpg'
+        biografia:
+          type: string
+          description: Descripción personal del usuario.
+          example: Jugador competitivo de shooters
+        rol:
+          type: string
+          description: Rol del usuario dentro del sistema.
+          example: USER
+        fechaRegistro:
+          type: string
+          format: date-time
+          description: Fecha de registro del usuario.
+          example: 2026-04-05T12:00:00
+        xpTotal:
+          type: integer
+          description: Experiencia total acumulada.
+          example: 120
+        nivel:
+          type: integer
+          description: Nivel actual del usuario.
+          example: 3
+        totalSeguidores:
+          type: integer
+          description: Número total de seguidores del usuario.
+          example: 10
+        totalSeguidos:
+          type: integer
+          description: Número total de usuarios seguidos.
+          example: 4
+        totalPublicaciones:
+          type: integer
+          description: Número total de publicaciones del usuario.
+          example: 7
+      required:
+        - id
+        - nombreUsuario
+        - email
+        - rol
+        - fechaRegistro
+        - xpTotal
+        - nivel
+        - totalSeguidores
+        - totalSeguidos
+        - totalPublicaciones
+
+    InternalUserUpdateRequest:
+      type: object
+      description: Datos necesarios para actualizar el perfil de un usuario.
+      properties:
+        nombreUsuario:
+          type: string
+          description: Nuevo nombre del usuario.
+          example: david_pro
+        fotoPerfil:
+          type: string
+          description: Nueva URL de la imagen de perfil.
+          example: 'https://xpup.com/img/nueva-foto.jpg'
+        biografia:
+          type: string
+          description: Nueva biografía del usuario.
+          example: Jugador de Valorant y LoL
+      required:
+        - nombreUsuario
+        - fotoPerfil
+        - biografia
+
+    InternalPostRequest:
+      type: object
+      description: Datos necesarios para crear una nueva publicación.
+      properties:
+        idUsuario:
+          $ref: '#/components/schemas/InternalUserId'
+        titulo:
+          type: string
+          description: Título de la publicación.
+          example: Mi clutch en Valorant
+        descripcion:
+          type: string
+          description: Descripción del contenido.
+          example: Ace increíble
+        tipoContenido:
+          type: string
+          description: Tipo de contenido de la publicación.
+          example: VIDEO
+        idJuegoApi:
+          type: string
+          description: Identificador del videojuego en la API externa.
+          example: "12345"
+        nombreJuego:
+          type: string
+          description: Nombre del juego asociado.
+          example: Valorant
+        portadaJuegoUrl:
+          type: string
+          description: URL de la portada del juego.
+          example: 'https://xpup.com/games/valorant.jpg'
+        archivoUrl:
+          type: string
+          description: URL del archivo multimedia principal.
+          example: 'https://xpup.com/media/post25.mp4'
+        miniaturaUrl:
+          type: string
+          description: URL de la miniatura del contenido.
+          example: 'https://xpup.com/media/post25-thumb.jpg'
+        hashtags:
+          type: array
+          description: Lista de hashtags asociados a la publicación.
+          items:
+            type: string
+          example: ["#valorant", "#ace", "#clutch"]
+      required:
+        - idUsuario
+        - titulo
+        - descripcion
+        - tipoContenido
+        - archivoUrl
+        - nombreJuego
+        - idJuegoApi
+
+    InternalCommentRequest:
+      type: object
+      description: Datos necesarios para crear un comentario en una publicación.
+      properties:
+        idUsuario:
+          $ref: '#/components/schemas/InternalUserId'
+        idPublicacion:
+          $ref: '#/components/schemas/InternalPostId'
+        contenido:
+          type: string
+          description: Texto del comentario.
+          example: Buenísima jugada
+      required:
+        - idUsuario
+        - idPublicacion
+        - contenido
+
+    InternalLikeRequest:
+      type: object
+      description: Datos necesarios para dar o quitar like a una publicación.
+      properties:
+        idUsuario:
+          $ref: '#/components/schemas/InternalUserId'
+        idPublicacion:
+          $ref: '#/components/schemas/InternalPostId'
+      required:
+        - idUsuario
+        - idPublicacion
+
+    InternalFollowRequest:
+      type: object
+      description: Datos necesarios para seguir o dejar de seguir a un usuario.
+      properties:
+        idSeguidor:
+          $ref: '#/components/schemas/InternalUserId'
+        idSeguido:
+          $ref: '#/components/schemas/InternalUserId'
+      required:
+        - idSeguidor
+        - idSeguido
+
+    InternalExperienceRequest:
+      type: object
+      description: Datos necesarios para actualizar la experiencia de un usuario.
+      properties:
+        xpTotal:
+          type: integer
+          description: Nueva cantidad total de experiencia acumulada del usuario.
+          example: 150
+        nivel:
+          type: integer
+          description: Nuevo nivel calculado para el usuario.
+          example: 4
+      required:
+        - xpTotal
+        - nivel
+
+    InternalLikeCheckResponse:
+      type: object
+      description: Resultado de la comprobación de si un usuario ha dado like a una publicación.
+      properties:
+        liked:
+          type: boolean
+          description: Indica si el usuario ha dado like a la publicación.
+          example: true
+      required:
+        - liked
+
+
+    InternalSavedCheckResponse:
+      type: object
+      description: Resultado de la comprobación de si un usuario ha guardado una publicación.
+      properties:
+        saved:
+          type: boolean
+          description: Indica si la publicación está guardada por el usuario.
+          example: true
+      required:
+        - saved
+
+
+    InternalFollowCheckResponse:
+      type: object
+      description: Resultado de la comprobación de si un usuario sigue a otro usuario.
+      properties:
+        following:
+          type: boolean
+          description: Indica si el usuario sigue al otro usuario.
+          example: true
+      required:
+        - following
+
+
+    InternalFollowStatsResponse:
+      type: object
+      description: Estadísticas de seguimiento de un usuario.
+      properties:
+        totalSeguidores:
+          type: integer
+          description: Número total de seguidores del usuario.
+          example: 12
+        totalSeguidos:
+          type: integer
+          description: Número total de usuarios a los que sigue.
+          example: 5
+      required:
+        - totalSeguidores
+        - totalSeguidos
+
+    InternalPostSummaryResponse:
+      type: object
+      description: Información resumida de una publicación para listados como feed o guardados.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalPostId'
+        usuario:
+          $ref: '#/components/schemas/InternalUserSummaryResponse'
+        titulo:
+          type: string
+          description: Título de la publicación.
+          example: Mi clutch en Valorant
+        descripcion:
+          type: string
+          description: Descripción breve del contenido.
+          example: Ace increíble
+        tipoContenido:
+          type: string
+          description: Tipo de contenido de la publicación.
+          example: VIDEO
+        archivoUrl:
+          type: string
+          description: URL del contenido multimedia.
+          example: https://xpup.com/media/post25.mp4
+        miniaturaUrl:
+          type: string
+          description: URL de la miniatura del contenido.
+          example: https://xpup.com/media/post25-thumb.jpg
+        nombreJuego:
+          type: string
+          description: Nombre del juego asociado a la publicación.
+          example: Valorant
+        portadaJuegoUrl:
+          type: string
+          description: URL de la portada del juego.
+          example: https://xpup.com/games/valorant.jpg
+        fechaPublicacion:
+          type: string
+          format: date-time
+          description: Fecha de publicación.
+          example: 2026-04-05T12:00:00
+        totalLikes:
+          type: integer
+          description: Número total de likes.
+          example: 18
+        totalComentarios:
+          type: integer
+          description: Número total de comentarios.
+          example: 5
+        likedByUser:
+          type: boolean
+          description: Indica si el usuario ha dado like.
+          example: true
+        savedByUser:
+          type: boolean
+          description: Indica si el usuario ha guardado la publicación.
+          example: true
+      required:
+        - id
+        - usuario
+        - titulo
+        - descripcion
+        - tipoContenido
+        - archivoUrl
+        - fechaPublicacion
+        - totalLikes
+        - totalComentarios
+        - likedByUser
+        - savedByUser
+
+    InternalUserSummaryResponse:
+      type: object
+      description: Información básica de un usuario utilizada en listados.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalUserId'
+        nombreUsuario:
+          type: string
+          description: Nombre del usuario.
+          example: david_pro
+        fotoPerfil:
+          type: string
+          description: URL de la imagen de perfil.
+          example: https://xpup.com/img/perfil1.jpg
+        nivel:
+          type: integer
+          description: Nivel del usuario.
+          example: 3
+      required:
+        - id
+        - nombreUsuario
+        - fotoPerfil
+        - nivel
+
+    AuthRegisterRequest:
+      type: object
+      description: Datos necesarios para registrar un nuevo usuario en XP-Up.
+      properties:
+        nombreUsuario:
+          type: string
+          minLength: 3
+          maxLength: 20
+          example: david_pro
+        email:
+          type: string
+          format: email
+          example: david@gmail.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          pattern: "^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$"
+          example: Password@123
+      required:
+        - nombreUsuario
+        - email
+        - password
+
+    AuthRegisterResponse:
+      type: object
+      description: Respuesta devuelta tras registrar un usuario correctamente.
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombreUsuario:
+          type: string
+          example: david_pro
+        email:
+          type: string
+          example: david@gmail.com
+        rol:
+          type: string
+          example: USER
+        fechaRegistro:
+          type: string
+          format: date-time
+          example: 2026-04-12T10:30:00
+        mensaje:
+          type: string
+          example: Usuario registrado correctamente
+      required:
+        - id
+        - nombreUsuario
+        - email
+        - rol
+        - fechaRegistro
+        - mensaje
+
+    AuthLoginRequest:
+      type: object
+      description: Credenciales necesarias para iniciar sesión.
+      properties:
+        identificador:
+          type: string
+          description: Email o nombre de usuario.
+          example: david_pro
+        password:
+          type: string
+          format: password
+          example: Password@123
+      required:
+        - identificador
+        - password
+
+    AuthLoginResponse:
+      type: object
+      description: Respuesta devuelta tras autenticación correcta.
+      properties:
+        token:
+          type: string
+          description: JWT del usuario autenticado.
+          example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYXZpZF9wcm8ifQ.signature
+        tokenType:
+          type: string
+          example: Bearer
+        user:
+          $ref: '#/components/schemas/AuthUserResponse'
+      required:
+        - token
+        - tokenType
+        - user
+
+    AuthUserResponse:
+      type: object
+      description: Información básica del usuario autenticado.
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombreUsuario:
+          type: string
+          example: david_pro
+        email:
+          type: string
+          example: david@gmail.com
+        rol:
+          type: string
+          example: USER
+      required:
+        - id
+        - nombreUsuario
+        - email
+        - rol
+
+    MessageResponse:
+      type: object
+      description: Respuesta simple de éxito.
+      properties:
+        mensaje:
+          type: string
+          example: Sesión cerrada correctamente
+      required:
+        - mensaje
+
+    ApiError:
+      type: object
+      description: Respuesta genérica de error de la API.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: 2026-04-12T10:35:00
+        status:
+          type: integer
+          example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: Credenciales incorrectas
+        path:
+          type: string
+          example: /api/auth/login
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+        - path
+
+    InternalPostCreateResponse:
+      type: object
+      description: Respuesta devuelta tras crear una publicación correctamente.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalPostId'
+        mensaje:
+          type: string
+          example: Publicación creada correctamente
+      required:
+        - id
+        - mensaje
+
+    InternalPostDetailResponse:
+      type: object
+      description: Información completa de una publicación concreta.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalPostId'
+        usuario:
+          $ref: '#/components/schemas/InternalUserSummaryResponse'
+        titulo:
+          type: string
+          example: Mi clutch en Valorant
+        descripcion:
+          type: string
+          example: Ace increíble
+        tipoContenido:
+          type: string
+          example: VIDEO
+        archivoUrl:
+          type: string
+          example: https://xpup.com/media/post25.mp4
+        miniaturaUrl:
+          type: string
+          example: https://xpup.com/media/post25-thumb.jpg
+        nombreJuego:
+          type: string
+          example: Valorant
+        portadaJuegoUrl:
+          type: string
+          example: https://xpup.com/games/valorant.jpg
+        fechaPublicacion:
+          type: string
+          format: date-time
+          example: 2026-04-05T12:00:00
+        totalLikes:
+          type: integer
+          example: 18
+        totalComentarios:
+          type: integer
+          example: 5
+        likedByUser:
+          type: boolean
+          example: true
+        savedByUser:
+          type: boolean
+          example: false
+      required:
+        - id
+        - usuario
+        - titulo
+        - descripcion
+        - tipoContenido
+        - archivoUrl
+        - fechaPublicacion
+        - totalLikes
+        - totalComentarios
+        - likedByUser
+        - savedByUser
+
+    InternalPostListResponse:
+      type: array
+      description: Lista de publicaciones.
+      items:
+        $ref: '#/components/schemas/InternalPostSummaryResponse'
+
+    InternalPagedPostResponse:
+      type: object
+      description: Resultado paginado de publicaciones.
+      properties:
+        content:
+          type: array
+          description: Lista de publicaciones de la página actual.
+          items:
+            $ref: '#/components/schemas/InternalPostSummaryResponse'
+        page:
+          type: integer
+          description: Número de página actual.
+          example: 0
+        size:
+          type: integer
+          description: Número de elementos por página.
+          example: 10
+        totalElements:
+          type: integer
+          description: Número total de publicaciones encontradas.
+          example: 57
+        totalPages:
+          type: integer
+          description: Número total de páginas.
+          example: 6
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+
+    InternalLikesCountResponse:
+      type: object
+      description: Número total de likes de una publicación.
+      properties:
+        postId:
+          $ref: '#/components/schemas/InternalPostId'
+        totalLikes:
+          type: integer
+          example: 18
+      required:
+        - postId
+        - totalLikes
+
+    InternalExperienceResponse:
+      type: object
+      description: Información de experiencia y nivel de un usuario.
+      properties:
+        userId:
+          $ref: '#/components/schemas/InternalUserId'
+        xpTotal:
+          type: integer
+          example: 150
+        nivel:
+          type: integer
+          example: 4
+      required:
+        - userId
+        - xpTotal
+        - nivel
+
+    InternalCommentResponse:
+      type: object
+      description: Información de un comentario publicado en una publicación.
+      properties:
+        id:
+          type: integer
+          example: 101
+        usuario:
+          $ref: '#/components/schemas/InternalUserSummaryResponse'
+        contenido:
+          type: string
+          description: Texto del comentario.
+          example: Buenísima jugada
+        fechaComentario:
+          type: string
+          format: date-time
+          description: Fecha de creación del comentario.
+          example: 2026-04-12T11:30:00
+      required:
+        - id
+        - usuario
+        - contenido
+        - fechaComentario
+
+    InternalCommentListResponse:
+      type: array
+      description: Lista de comentarios de una publicación.
+      items:
+        $ref: '#/components/schemas/InternalCommentResponse'
+
+    InternalUserListResponse:
+      type: array
+      description: Lista de usuarios.
+      items:
+        $ref: '#/components/schemas/InternalUserSummaryResponse'
+
+    ExternalGameResponse:
+      type: object
+      description: Información básica de un videojuego obtenida desde la API externa.
+      properties:
+        idJuegoApi:
+          type: string
+          description: Identificador único del videojuego en la API externa.
+          example: "12345"
+        nombreJuego:
+          type: string
+          description: Nombre del videojuego.
+          example: Valorant
+        portadaJuegoUrl:
+          type: string
+          description: URL de la portada del videojuego.
+          example: https://images.igdb.com/valorant.jpg
+        fechaLanzamiento:
+          type: string
+          format: date
+          description: Fecha de lanzamiento del videojuego.
+          example: 2020-06-02
+      required:
+        - idJuegoApi
+        - nombreJuego
+        - fechaLanzamiento
+
+    ExternalGameListResponse:
+      type: array
+      description: Lista de videojuegos obtenidos desde la API externa.
+      items:
+        $ref: '#/components/schemas/ExternalGameResponse'
