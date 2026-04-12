@@ -2,6 +2,7 @@ package com.david.xpup.backend.exception;
 
 import com.david.xpup.generated.model.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -79,6 +80,8 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        ex.printStackTrace();
+
         ApiError error = buildApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Internal Server Error",
@@ -117,6 +120,27 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         String message = "Parámetro inválido: " + ex.getName();
+
+        ApiError error = buildApiError(
+                HttpStatus.BAD_REQUEST,
+                "Bad Request",
+                message,
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletRequest request
+    ) {
+        String message = ex.getConstraintViolations()
+                .stream()
+                .findFirst()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .orElse("Datos de entrada inválidos");
 
         ApiError error = buildApiError(
                 HttpStatus.BAD_REQUEST,
