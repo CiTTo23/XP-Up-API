@@ -77,20 +77,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthLoginResponse loginUser(AuthLoginRequest request) {
-        // 1. Buscar usuario
         Usuario usuario = usuarioRepository
                 .findByEmailOrNombreUsuario(
                         request.getIdentificador(),
                         request.getIdentificador()
                 )
                 .orElseThrow(() -> new UnauthorizedException("Credenciales incorrectas"));
-        // 2. Comprobar password
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
             throw new UnauthorizedException("Credenciales incorrectas");
         }
-        // 3. Generar token
-        String token = jwtService.generateToken(usuario.getNombreUsuario());
-        // 4. Construir respuesta
+        String token = jwtService.generateToken(usuario.getId());
         AuthLoginResponse response = new AuthLoginResponse();
         response.setToken(token);
         response.setTokenType("Bearer");

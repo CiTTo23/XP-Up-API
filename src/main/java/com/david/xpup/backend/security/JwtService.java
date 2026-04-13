@@ -23,25 +23,27 @@ public class JwtService {
         this.jwtExpirationMs = jwtExpirationMs;
     }
 
-    public String generateToken(String subject) {
+    public String generateToken(Integer userId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
-                .subject(subject)
+                .subject(String.valueOf(userId))
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(secretKey)
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parser()
+    public Integer extractUserId(String token) {
+        String subject = Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+
+        return Integer.valueOf(subject);
     }
 
     public boolean isTokenValid(String token) {

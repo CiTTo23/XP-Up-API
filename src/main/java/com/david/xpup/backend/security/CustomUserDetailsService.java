@@ -28,4 +28,15 @@ public class CustomUserDetailsService implements UserDetailsService {
                 List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
         );
     }
+
+    public UserDetails loadUserById(Integer userId) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con id: " + userId));
+
+        return new User(
+                usuario.getNombreUsuario(),
+                usuario.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
+        );
+    }
 }
