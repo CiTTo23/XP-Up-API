@@ -1,3 +1,18 @@
+/***********************************************************************************************************************
+*   Repositorio JPA para la gestión de publicaciones guardadas en la base de datos del proyecto                        *
+*                                                                                                                      *
+*   Proporciona operaciones CRUD básicas heredadas de JpaRepository y métodos de consulta específicos                  *
+*   relacionados con las publicaciones que los usuarios han guardado                                                   *
+*                                                                                                                      *
+*   Funcionalidades principales:                                                                                       *
+*       - Obtener las publicaciones guardadas por un usuario ordenadas por fecha descendente                           *
+*       - Obtener los usuarios que han guardado una publicación                                                        *
+*       - Comprobar si un usuario ha guardado una publicación                                                          *
+*       - Eliminar un guardado concreto                                                                                *
+*       - Contar cuántas veces ha sido guardada una publicación                                                        *
+*                                                                                                                      *
+***********************************************************************************************************************/
+
 package com.david.xpup.backend.repository;
 
 import com.david.xpup.backend.entity.Guardado;

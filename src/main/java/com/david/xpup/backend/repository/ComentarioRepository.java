@@ -1,3 +1,16 @@
+/***********************************************************************************************************************
+*   Repositorio JPA para la gestión de comentarios en la base de datos del proyecto                                    *
+*                                                                                                                      *
+*   Proporciona operaciones CRUD básicas heredadas de JpaRepository y métodos de consulta más específicos              *
+*   para recuperar y contar comentarios en función del usuario o de la publicación asociada                            *
+*                                                                                                                      *
+*   Funcionalidades principales:                                                                                       *
+*       - Obtener todos los comentarios de una publicación ordenados por fecha ascendente                              *
+*       - Obtener todos los comentarios realizados por un usuario                                                      *
+*       - Contar cuántos comentarios tiene una publicación                                                             *
+*                                                                                                                      *
+***********************************************************************************************************************/
+
 package com.david.xpup.backend.repository;
 
 import com.david.xpup.backend.entity.Comentario;
