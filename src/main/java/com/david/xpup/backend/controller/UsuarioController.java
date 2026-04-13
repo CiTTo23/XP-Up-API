@@ -16,6 +16,7 @@ public class UsuarioController implements UsuariosApi {
 
     private final UsuarioService usuarioService;
 
+
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }

@@ -1,14 +1,10 @@
 package com.david.xpup.backend.service.impl;
 
-import com.david.xpup.backend.entity.Experiencia;
-import com.david.xpup.backend.entity.Usuario;
+import com.david.xpup.backend.entity.*;
 import com.david.xpup.backend.exception.DuplicateResourceException;
 import com.david.xpup.backend.exception.ResourceNotFoundException;
 import com.david.xpup.backend.mapper.UsuarioMapper;
-import com.david.xpup.backend.repository.ExperienciaRepository;
-import com.david.xpup.backend.repository.PublicacionRepository;
-import com.david.xpup.backend.repository.SeguimientoRepository;
-import com.david.xpup.backend.repository.UsuarioRepository;
+import com.david.xpup.backend.repository.*;
 import com.david.xpup.backend.service.UsuarioService;
 import com.david.xpup.generated.model.InternalPostSummaryResponse;
 import com.david.xpup.generated.model.InternalUserProfileResponse;
@@ -25,6 +21,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final ExperienciaRepository experienciaRepository;
     private final SeguimientoRepository seguimientoRepository;
     private final PublicacionRepository publicacionRepository;
+    private final LikeRepository likeRepository;
+    private final ComentarioRepository comentarioRepository;
+    private final GuardadoRepository guardadoRepository;
     private final UsuarioMapper usuarioMapper;
 
     public UsuarioServiceImpl(
@@ -32,12 +31,18 @@ public class UsuarioServiceImpl implements UsuarioService {
             ExperienciaRepository experienciaRepository,
             SeguimientoRepository seguimientoRepository,
             PublicacionRepository publicacionRepository,
+            LikeRepository likeRepository,
+            ComentarioRepository comentarioRepository,
+            GuardadoRepository guardadoRepository,
             UsuarioMapper usuarioMapper
     ) {
         this.usuarioRepository = usuarioRepository;
         this.experienciaRepository = experienciaRepository;
         this.seguimientoRepository = seguimientoRepository;
         this.publicacionRepository = publicacionRepository;
+        this.likeRepository = likeRepository;
+        this.comentarioRepository = comentarioRepository;
+        this.guardadoRepository = guardadoRepository;
         this.usuarioMapper = usuarioMapper;
     }
 
@@ -69,27 +74,121 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public List<InternalPostSummaryResponse> getUserPosts(Integer userId) {
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+
+        Experiencia experiencia = experienciaRepository.findByUsuario(usuario).orElse(null);
+        InternalUserSummaryResponse usuarioResumen = usuarioMapper.toUserSummaryResponse(usuario, experiencia);
+
+        List<Publicacion> publicaciones = publicacionRepository.findByUsuarioOrderByFechaPublicacionDesc(usuario);
+
+        return publicaciones.stream()
+                .map(publicacion -> {
+                    long totalLikes = likeRepository.countByPublicacion(publicacion);
+                    long totalComentarios = comentarioRepository.countByPublicacion(publicacion);
+
+                    return usuarioMapper.toPostSummaryResponse(
+                            publicacion,
+                            usuarioResumen,
+                            totalLikes,
+                            totalComentarios,
+                            false,
+                            false
+                    );
+                })
+                .toList();
     }
 
     @Override
     public List<InternalPostSummaryResponse> getUserLikedPosts(Integer userId) {
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+
+        List<Like> likes = likeRepository.findByUsuarioOrderByFechaLikeDesc(usuario);
+
+        return likes.stream()
+                .map(Like::getPublicacion)
+                .map(publicacion -> {
+                    Usuario autor = publicacion.getUsuario();
+                    Experiencia experienciaAutor = experienciaRepository.findByUsuario(autor).orElse(null);
+                    InternalUserSummaryResponse usuarioResumen =
+                            usuarioMapper.toUserSummaryResponse(autor, experienciaAutor);
+
+                    long totalLikes = likeRepository.countByPublicacion(publicacion);
+                    long totalComentarios = comentarioRepository.countByPublicacion(publicacion);
+
+                    return usuarioMapper.toPostSummaryResponse(
+                            publicacion,
+                            usuarioResumen,
+                            totalLikes,
+                            totalComentarios,
+                            true,
+                            false
+                    );
+                })
+                .toList();
     }
 
     @Override
     public List<InternalPostSummaryResponse> getUserSavedPosts(Integer userId) {
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+
+        List<Guardado> guardados = guardadoRepository.findByUsuarioOrderByFechaGuardadoDesc(usuario);
+
+        return guardados.stream()
+                .map(Guardado::getPublicacion)
+                .map(publicacion -> {
+                    Usuario autor = publicacion.getUsuario();
+                    Experiencia experienciaAutor = experienciaRepository.findByUsuario(autor).orElse(null);
+                    InternalUserSummaryResponse usuarioResumen =
+                            usuarioMapper.toUserSummaryResponse(autor, experienciaAutor);
+
+                    long totalLikes = likeRepository.countByPublicacion(publicacion);
+                    long totalComentarios = comentarioRepository.countByPublicacion(publicacion);
+
+                    return usuarioMapper.toPostSummaryResponse(
+                            publicacion,
+                            usuarioResumen,
+                            totalLikes,
+                            totalComentarios,
+                            false,
+                            true
+                    );
+                })
+                .toList();
     }
 
     @Override
     public List<InternalUserSummaryResponse> getUserFollowing(Integer userId) {
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+
+        List<Seguimiento> seguimientos = seguimientoRepository.findBySeguidorOrderByFechaSeguimientoDesc(usuario);
+
+        return seguimientos.stream()
+                .map(Seguimiento::getSeguido)
+                .map(usuarioSeguido -> {
+                    Experiencia experiencia = experienciaRepository.findByUsuario(usuarioSeguido).orElse(null);
+                    return usuarioMapper.toUserSummaryResponse(usuarioSeguido, experiencia);
+                })
+                .toList();
     }
 
     @Override
     public List<InternalUserSummaryResponse> getUserFollowers(Integer userId) {
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+
+        List<Seguimiento> seguimientos = seguimientoRepository.findBySeguidoOrderByFechaSeguimientoDesc(usuario);
+
+        return seguimientos.stream()
+                .map(Seguimiento::getSeguidor)
+                .map(usuarioSeguidor -> {
+                    Experiencia experiencia = experienciaRepository.findByUsuario(usuarioSeguidor).orElse(null);
+                    return usuarioMapper.toUserSummaryResponse(usuarioSeguidor, experiencia);
+                })
+                .toList();
     }
 
 
