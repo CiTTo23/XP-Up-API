@@ -74,7 +74,7 @@ public class PublicacionServiceImpl implements PublicacionService {
             throw new UnauthorizedException("No tienes permisos para crear publicaciones para otro usuario");
         }
 
-        //Buscamos el usuario autor de la publicación
+        //Buscamos el usuario autor de la publicación a partir del id recibido en la request
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Usuario no encontrado con id: " + request.getIdUsuario()

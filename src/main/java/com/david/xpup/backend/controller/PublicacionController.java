@@ -6,6 +6,7 @@ import com.david.xpup.generated.model.InternalPostCreateResponse;
 import com.david.xpup.generated.model.InternalPostDetailResponse;
 import com.david.xpup.generated.model.InternalPostRequest;
 import com.david.xpup.generated.model.MessageResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +21,7 @@ public class PublicacionController implements PublicacionesApi {
     }
 
     @Override
-    public ResponseEntity<InternalPostCreateResponse> createPost(InternalPostRequest internalPostRequest) {
+    public ResponseEntity<InternalPostCreateResponse> createPost(@Valid InternalPostRequest internalPostRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(publicacionService.createPost(internalPostRequest));
     }

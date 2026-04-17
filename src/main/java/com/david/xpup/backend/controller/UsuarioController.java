@@ -6,6 +6,7 @@ import com.david.xpup.generated.model.InternalPostSummaryResponse;
 import com.david.xpup.generated.model.InternalUserProfileResponse;
 import com.david.xpup.generated.model.InternalUserSummaryResponse;
 import com.david.xpup.generated.model.InternalUserUpdateRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +28,7 @@ public class UsuarioController implements UsuariosApi {
     }
 
     @Override
-    public ResponseEntity<InternalUserProfileResponse> updateUserProfile(Integer userId, InternalUserUpdateRequest internalUserUpdateRequest) {
+    public ResponseEntity<InternalUserProfileResponse> updateUserProfile(Integer userId, @Valid InternalUserUpdateRequest internalUserUpdateRequest) {
         return ResponseEntity.ok(usuarioService.updateUserProfile(userId, internalUserUpdateRequest));
     }
 
