@@ -75,4 +75,5 @@ public class Publicacion {
 
     @Column(name = "fecha_publicacion", nullable = false)
     private LocalDateTime fechaPublicacion;
+
 }
