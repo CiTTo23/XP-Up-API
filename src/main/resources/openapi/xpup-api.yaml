@@ -506,6 +506,7 @@ paths:
           schema:
             type: integer
             minimum: 1
+            maximum: 50
             example: 10
         - name: nombreJuego
           in: query
@@ -564,6 +565,7 @@ paths:
           schema:
             type: integer
             minimum: 1
+            maximum: 50
             example: 10
       responses:
         "200":
@@ -1170,11 +1172,13 @@ components:
     InternalUserId:
       type: integer
       description: Identificador único de un usuario dentro del sistema.
+      minimum: 1
       example: 123
 
     InternalPostId:
       type: integer
       description: Identificador único de una publicación dentro del sistema.
+      minimum: 1
       example: 321
 
     InternalUserProfileResponse:
@@ -1190,14 +1194,18 @@ components:
         email:
           type: string
           description: Correo electrónico del usuario.
+          format: email
+          maxLength: 50
           example: david@gmail.com
         fotoPerfil:
           type: string
           description: URL de la imagen de perfil.
+          maxLength: 255
           example: 'https://xpup.com/img/perfil1.jpg'
         biografia:
           type: string
           description: Descripción personal del usuario.
+          maxLength: 255
           example: Jugador competitivo de shooters
         rol:
           type: string
@@ -1211,22 +1219,27 @@ components:
         xpTotal:
           type: integer
           description: Experiencia total acumulada.
+          minimum: 0
           example: 120
         nivel:
           type: integer
           description: Nivel actual del usuario.
+          minimum: 1
           example: 3
         totalSeguidores:
           type: integer
           description: Número total de seguidores del usuario.
+          minimum: 0
           example: 10
         totalSeguidos:
           type: integer
           description: Número total de usuarios seguidos.
+          minimum: 0
           example: 4
         totalPublicaciones:
           type: integer
           description: Número total de publicaciones del usuario.
+          minimum: 0
           example: 7
       required:
         - id
@@ -1248,18 +1261,21 @@ components:
           type: string
           description: Nuevo nombre del usuario.
           example: david_pro
+          minLength: 3
+          maxLength: 20
+          pattern: "^[a-zA-Z0-9._]+$"
         fotoPerfil:
           type: string
           description: Nueva URL de la imagen de perfil.
+          maxLength: 255
           example: 'https://xpup.com/img/nueva-foto.jpg'
         biografia:
           type: string
           description: Nueva biografía del usuario.
           example: Jugador de Valorant y LoL
+          maxLength: 255
       required:
         - nombreUsuario
-        - fotoPerfil
-        - biografia
 
     InternalPostRequest:
       type: object
@@ -1270,45 +1286,58 @@ components:
         titulo:
           type: string
           description: Título de la publicación.
+          minLength: 1
+          maxLength: 75
           example: Mi clutch en Valorant
         descripcion:
           type: string
           description: Descripción del contenido.
+          maxLength: 2000
           example: Ace increíble
         tipoContenido:
           type: string
+          enum: [VIDEO, IMAGEN]
           description: Tipo de contenido de la publicación.
           example: VIDEO
         idJuegoApi:
           type: string
           description: Identificador del videojuego en la API externa.
+          minLength: 1
+          maxLength: 50
           example: "12345"
         nombreJuego:
           type: string
           description: Nombre del juego asociado.
+          minLength: 1
+          maxLength: 50
           example: Valorant
         portadaJuegoUrl:
           type: string
           description: URL de la portada del juego.
+          maxLength: 255
           example: 'https://xpup.com/games/valorant.jpg'
         archivoUrl:
           type: string
           description: URL del archivo multimedia principal.
+          maxLength: 255
           example: 'https://xpup.com/media/post25.mp4'
         miniaturaUrl:
           type: string
           description: URL de la miniatura del contenido.
+          maxLength: 255
           example: 'https://xpup.com/media/post25-thumb.jpg'
         hashtags:
           type: array
+          maxItems: 10
           description: Lista de hashtags asociados a la publicación.
           items:
             type: string
+            minLength: 2
+            maxLength: 30
           example: ["#valorant", "#ace", "#clutch"]
       required:
         - idUsuario
         - titulo
-        - descripcion
         - tipoContenido
         - archivoUrl
         - nombreJuego
@@ -1325,6 +1354,8 @@ components:
         contenido:
           type: string
           description: Texto del comentario.
+          minLength: 1
+          maxLength: 1000
           example: Buenísima jugada
       required:
         - idUsuario
@@ -1362,10 +1393,12 @@ components:
         xpTotal:
           type: integer
           description: Nueva cantidad total de experiencia acumulada del usuario.
+          minimum: 0
           example: 150
         nivel:
           type: integer
           description: Nuevo nivel calculado para el usuario.
+          minimum: 1
           example: 4
       required:
         - xpTotal
@@ -1414,10 +1447,12 @@ components:
         totalSeguidores:
           type: integer
           description: Número total de seguidores del usuario.
+          minimum: 0
           example: 12
         totalSeguidos:
           type: integer
           description: Número total de usuarios a los que sigue.
+          minimum: 0
           example: 5
       required:
         - totalSeguidores
@@ -1446,10 +1481,12 @@ components:
         archivoUrl:
           type: string
           description: URL del contenido multimedia.
+          maxLength: 255
           example: https://xpup.com/media/post25.mp4
         miniaturaUrl:
           type: string
           description: URL de la miniatura del contenido.
+          maxLength: 255
           example: https://xpup.com/media/post25-thumb.jpg
         nombreJuego:
           type: string
@@ -1458,6 +1495,7 @@ components:
         portadaJuegoUrl:
           type: string
           description: URL de la portada del juego.
+          maxLength: 255
           example: https://xpup.com/games/valorant.jpg
         fechaPublicacion:
           type: string
@@ -1467,10 +1505,12 @@ components:
         totalLikes:
           type: integer
           description: Número total de likes.
+          minimum: 0
           example: 18
         totalComentarios:
           type: integer
           description: Número total de comentarios.
+          minimum: 0
           example: 5
         likedByUser:
           type: boolean
@@ -1484,7 +1524,6 @@ components:
         - id
         - usuario
         - titulo
-        - descripcion
         - tipoContenido
         - archivoUrl
         - fechaPublicacion
@@ -1506,15 +1545,16 @@ components:
         fotoPerfil:
           type: string
           description: URL de la imagen de perfil.
+          maxLength: 255
           example: https://xpup.com/img/perfil1.jpg
         nivel:
           type: integer
           description: Nivel del usuario.
+          minimum: 1
           example: 3
       required:
         - id
         - nombreUsuario
-        - fotoPerfil
         - nivel
 
     AuthRegisterRequest:
@@ -1523,16 +1563,19 @@ components:
       properties:
         nombreUsuario:
           type: string
+          pattern: "^[a-zA-Z0-9._]+$"
           minLength: 3
           maxLength: 20
           example: david_pro
         email:
           type: string
           format: email
+          maxLength: 50
           example: david@gmail.com
         password:
           type: string
           format: password
+          maxLength: 100
           minLength: 8
           pattern: "^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$"
           example: Password@123
@@ -1553,6 +1596,8 @@ components:
           example: david_pro
         email:
           type: string
+          format: email
+          maxLength: 50
           example: david@gmail.com
         rol:
           type: string
@@ -1579,10 +1624,14 @@ components:
         identificador:
           type: string
           description: Email o nombre de usuario.
+          minLength: 3
+          maxLength: 50
           example: david_pro
         password:
           type: string
           format: password
+          minLength: 8
+          maxLength: 100
           example: Password@123
       required:
         - identificador
@@ -1618,6 +1667,8 @@ components:
           example: david_pro
         email:
           type: string
+          format: email
+          maxLength: 50
           example: david@gmail.com
         rol:
           type: string
@@ -1697,15 +1748,18 @@ components:
           example: VIDEO
         archivoUrl:
           type: string
+          maxLength: 255
           example: https://xpup.com/media/post25.mp4
         miniaturaUrl:
           type: string
+          maxLength: 255
           example: https://xpup.com/media/post25-thumb.jpg
         nombreJuego:
           type: string
           example: Valorant
         portadaJuegoUrl:
           type: string
+          maxLength: 255
           example: https://xpup.com/games/valorant.jpg
         fechaPublicacion:
           type: string
@@ -1713,9 +1767,11 @@ components:
           example: 2026-04-05T12:00:00
         totalLikes:
           type: integer
+          minimum: 0
           example: 18
         totalComentarios:
           type: integer
+          minimum: 0
           example: 5
         likedByUser:
           type: boolean
@@ -1727,7 +1783,6 @@ components:
         - id
         - usuario
         - titulo
-        - descripcion
         - tipoContenido
         - archivoUrl
         - fechaPublicacion
@@ -1754,18 +1809,23 @@ components:
         page:
           type: integer
           description: Número de página actual.
+          minimum: 0
           example: 0
         size:
           type: integer
           description: Número de elementos por página.
+          minimum: 1
+          maximum: 50
           example: 10
         totalElements:
           type: integer
           description: Número total de publicaciones encontradas.
+          minimum: 0
           example: 57
         totalPages:
           type: integer
           description: Número total de páginas.
+          minimum: 0
           example: 6
       required:
         - content
@@ -1782,6 +1842,7 @@ components:
           $ref: '#/components/schemas/InternalPostId'
         totalLikes:
           type: integer
+          minimum: 0
           example: 18
       required:
         - postId
@@ -1795,9 +1856,11 @@ components:
           $ref: '#/components/schemas/InternalUserId'
         xpTotal:
           type: integer
+          minimum: 0
           example: 150
         nivel:
           type: integer
+          minimum: 1
           example: 4
       required:
         - userId
@@ -1816,6 +1879,7 @@ components:
         contenido:
           type: string
           description: Texto del comentario.
+          maxLength: 1000
           example: Buenísima jugada
         fechaComentario:
           type: string
@@ -1847,14 +1911,19 @@ components:
         idJuegoApi:
           type: string
           description: Identificador único del videojuego en la API externa.
+          minLength: 1
+          maxLength: 50
           example: "12345"
         nombreJuego:
           type: string
           description: Nombre del videojuego.
+          minLength: 1
+          maxLength: 100
           example: Valorant
         portadaJuegoUrl:
           type: string
           description: URL de la portada del videojuego.
+          maxLength: 255
           example: https://images.igdb.com/valorant.jpg
         fechaLanzamiento:
           type: string
