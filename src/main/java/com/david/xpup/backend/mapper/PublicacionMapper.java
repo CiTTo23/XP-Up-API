@@ -62,4 +62,5 @@ public class PublicacionMapper {
         response.setSavedByUser(savedByUser);
         return response;
     }
+
 }

@@ -16,17 +16,16 @@
 
 package com.david.xpup.backend.service.impl;
 
+import com.david.xpup.backend.entity.Experiencia;
 import com.david.xpup.backend.entity.Publicacion;
 import com.david.xpup.backend.entity.Usuario;
 import com.david.xpup.backend.exception.ResourceNotFoundException;
 import com.david.xpup.backend.exception.UnauthorizedException;
-import com.david.xpup.backend.repository.PublicacionRepository;
-import com.david.xpup.backend.repository.UsuarioRepository;
+import com.david.xpup.backend.mapper.PublicacionMapper;
+import com.david.xpup.backend.mapper.UsuarioMapper;
+import com.david.xpup.backend.repository.*;
 import com.david.xpup.backend.service.PublicacionService;
-import com.david.xpup.generated.model.InternalPostCreateResponse;
-import com.david.xpup.generated.model.InternalPostDetailResponse;
-import com.david.xpup.generated.model.InternalPostRequest;
-import com.david.xpup.generated.model.MessageResponse;
+import com.david.xpup.generated.model.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -38,13 +37,31 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     private final PublicacionRepository publicacionRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ExperienciaRepository experienciaRepository;
+    private final LikeRepository likeRepository;
+    private final ComentarioRepository comentarioRepository;
+    private final GuardadoRepository guardadoRepository;
+    private final UsuarioMapper usuarioMapper;
+    private final PublicacionMapper publicacionMapper;
 
     public PublicacionServiceImpl(
             PublicacionRepository publicacionRepository,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            ExperienciaRepository experienciaRepository,
+            LikeRepository likeRepository,
+            ComentarioRepository comentarioRepository,
+            GuardadoRepository guardadoRepository,
+            UsuarioMapper usuarioMapper,
+            PublicacionMapper publicacionMapper
     ) {
         this.publicacionRepository = publicacionRepository;
         this.usuarioRepository = usuarioRepository;
+        this.experienciaRepository = experienciaRepository;
+        this.likeRepository = likeRepository;
+        this.comentarioRepository = comentarioRepository;
+        this.guardadoRepository = guardadoRepository;
+        this.usuarioMapper = usuarioMapper;
+        this.publicacionMapper = publicacionMapper;
     }
 
     //Crea una nueva publicación en el sistema -> POST /api/posts
@@ -90,12 +107,60 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     @Override
     public InternalPostDetailResponse getPostById(Integer postId) {
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        //Buscamos la publicación y lanzamos excepción 404 si no existe
+        Publicacion publicacion = publicacionRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Publicación no encontrada con id: " + postId));
+
+        //Obtenemos el usuario autenticado, necesario para calcular el estado de interacción con la publicación
+        Usuario usuarioAutenticado = getAuthenticatedUsuario();
+
+        //Obtenemos el autor de la publicación
+        Usuario autor = publicacion.getUsuario();
+
+        //Obtenemos la experiencia del autor para construir el resumen de usuario con nivel
+        Experiencia experienciaAutor = experienciaRepository.findByUsuario(autor).orElse(null);
+        InternalUserSummaryResponse usuarioResumen = usuarioMapper.toUserSummaryResponse(autor, experienciaAutor);
+
+        //Calculamos estadísticas e interacción del usuario autenticado con la publicación
+        long totalLikes = likeRepository.countByPublicacion(publicacion);
+        long totalComentarios = comentarioRepository.countByPublicacion(publicacion);
+        boolean likedByUser = likeRepository.existsByUsuarioAndPublicacion(usuarioAutenticado, publicacion);
+        boolean savedByUser = guardadoRepository.existsByUsuarioAndPublicacion(usuarioAutenticado, publicacion);
+
+        //Construimos y devolvemos el detalle completo de la publicación
+        return publicacionMapper.toPostDetailResponse(
+                publicacion,
+                usuarioResumen,
+                totalLikes,
+                totalComentarios,
+                likedByUser,
+                savedByUser
+        );
     }
 
+    //Elimina una publicación del sistema -> DELETE /api/posts/{postId}
     @Override
     public MessageResponse deletePost(Integer postId) {
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        //Buscamos la publicación y lanzamos excepción 404 si no existe
+        Publicacion publicacion = publicacionRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Publicación no encontrada con id: " + postId));
+
+        //Obtenemos el usuario autenticado para comprobar permisos
+        Usuario usuarioAutenticado = getAuthenticatedUsuario();
+
+        //Solo el autor de la publicación puede eliminarla
+        if (!publicacion.getUsuario().getId().equals(usuarioAutenticado.getId())) {
+            throw new UnauthorizedException("No tienes permisos para eliminar esta publicación");
+        }
+
+        //Eliminamos la publicación de BD
+        publicacionRepository.delete(publicacion);
+
+        //Construimos la respuesta de éxito
+        MessageResponse response = new MessageResponse();
+        response.setMensaje("Publicación eliminada correctamente");
+
+        return response;
     }
 
     //Obtiene el usuario autenticado actual a partir del SecurityContext de Spring Security
