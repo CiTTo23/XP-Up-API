@@ -1,12 +1,14 @@
 package com.david.xpup.backend.mapper;
 
 import com.david.xpup.backend.entity.Publicacion;
+import com.david.xpup.generated.model.InternalPagedPostResponse;
 import com.david.xpup.generated.model.InternalPostDetailResponse;
 import com.david.xpup.generated.model.InternalPostSummaryResponse;
 import com.david.xpup.generated.model.InternalUserSummaryResponse;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneOffset;
+import java.util.List;
 
 @Component
 public class PublicacionMapper {
@@ -63,4 +65,19 @@ public class PublicacionMapper {
         return response;
     }
 
+    public InternalPagedPostResponse toPagedPostResponse(
+            List<InternalPostSummaryResponse> content,
+            int page,
+            int size,
+            long totalElements,
+            int totalPages
+    ) {
+        InternalPagedPostResponse response = new InternalPagedPostResponse();
+        response.setContent(content);
+        response.setPage(page);
+        response.setSize(size);
+        response.setTotalElements((int) totalElements);
+        response.setTotalPages(totalPages);
+        return response;
+    }
 }
