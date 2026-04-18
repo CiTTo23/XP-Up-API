@@ -16,6 +16,7 @@ import com.david.xpup.generated.model.AuthRegisterResponse;
 import com.david.xpup.generated.model.MessageResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
         this.jwtService = jwtService;
     }
 
+    @Transactional
     @Override
     public AuthRegisterResponse registerUser(AuthRegisterRequest request) {
         if (usuarioRepository.existsByNombreUsuario(request.getNombreUsuario())) {

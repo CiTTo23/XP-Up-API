@@ -29,6 +29,7 @@ import com.david.xpup.generated.model.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -65,6 +66,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     }
 
     //Crea una nueva publicación en el sistema -> POST /api/posts
+    @Transactional
     @Override
     public InternalPostCreateResponse createPost(InternalPostRequest request) {
         //Obtenemos el usuario autenticado para impedir que se creen publicaciones a nombre de otro usuario
@@ -139,6 +141,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     }
 
     //Elimina una publicación del sistema -> DELETE /api/posts/{postId}
+    @Transactional
     @Override
     public MessageResponse deletePost(Integer postId) {
         //Buscamos la publicación y lanzamos excepción 404 si no existe

@@ -33,6 +33,7 @@ import com.david.xpup.generated.model.InternalUserSummaryResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,6 +65,7 @@ public class ComentarioServiceImpl implements ComentarioService {
     }
 
     //Crea un comentario en una publicación -> POST /api/comments
+    @Transactional
     @Override
     public InternalCommentResponse createComment(InternalCommentRequest request) {
         //Obtenemos el usuario autenticado para impedir que se creen comentarios a nombre de otro usuario

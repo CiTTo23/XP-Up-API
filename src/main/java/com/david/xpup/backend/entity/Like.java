@@ -20,7 +20,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-//creación de uniqueConstraint para evitar que no haya dos filas con la misma combinación de id_usuario e id_publicacion, usuario no puede guardar 2 veces la misma publicación
+//creación de uniqueConstraint para evitar que no haya dos filas con la misma combinación de id_usuario e id_publicacion, un usuario no puede dar like 2 veces a la misma publicación
 //creación de indices para mejorar el rendimiento en consultas del tipo "cuantas veces se ha marcado esta publicacion con "me gusta"?"
 @Table(name = "likes",
         uniqueConstraints = {

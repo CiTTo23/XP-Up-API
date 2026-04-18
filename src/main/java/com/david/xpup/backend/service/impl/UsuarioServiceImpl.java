@@ -38,6 +38,7 @@ import com.david.xpup.generated.model.InternalUserUpdateRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -88,6 +89,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
     //Actualiza los datos que son editables del perfil de un usuario -> PUT /api/users/{userId}
+    @Transactional
     @Override
     public InternalUserProfileResponse updateUserProfile(Integer userId, InternalUserUpdateRequest request) {
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
