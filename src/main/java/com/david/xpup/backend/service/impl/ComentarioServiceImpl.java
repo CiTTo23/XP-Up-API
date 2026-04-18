@@ -3,12 +3,12 @@
  *                                                                                                                      *
  *   Esta clase contiene la lógica asociada a la creación y consulta de comentarios dentro de la plataforma            *
  *                                                                                                                      *
- *   Métodos principales:                                                                                               *
- *       - Crear un nuevo comentario en una publicación                                                                 *
- *       - Obtener la lista de comentarios de una publicación                                                           *
+ *   Métodos principales:                                                                                              *
+ *       - Crear un nuevo comentario en una publicación                                                                *
+ *       - Obtener la lista de comentarios de una publicación                                                          *
  *                                                                                                                      *
  *   Para ello, coordina diferentes repositorios del sistema y aplica validaciones de existencia y permisos            *
- *   antes de ejecutar operaciones sobre los comentarios                                                                *
+ *   antes de ejecutar operaciones sobre los comentarios                                                               *
  *                                                                                                                      *
  ***********************************************************************************************************************/
 
@@ -126,7 +126,7 @@ public class ComentarioServiceImpl implements ComentarioService {
                     InternalUserSummaryResponse usuarioResumen =
                             usuarioMapper.toUserSummaryResponse(autor, experienciaAutor);
 
-                    //Construimos y devolvemos el DTO de comentario
+                    //Construimos y devolvemos el DTO del comentario
                     return comentarioMapper.toCommentResponse(comentario, usuarioResumen);
                 })
                 .toList();

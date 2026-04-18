@@ -4,6 +4,7 @@ import com.david.xpup.backend.service.ComentarioService;
 import com.david.xpup.generated.api.ComentariosApi;
 import com.david.xpup.generated.model.InternalCommentRequest;
 import com.david.xpup.generated.model.InternalCommentResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +21,7 @@ public class ComentarioController implements ComentariosApi {
     }
 
     @Override
-    public ResponseEntity<InternalCommentResponse> createComment(InternalCommentRequest internalCommentRequest) {
+    public ResponseEntity<InternalCommentResponse> createComment(@Valid InternalCommentRequest internalCommentRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(comentarioService.createComment(internalCommentRequest));
     }
