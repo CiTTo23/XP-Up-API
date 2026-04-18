@@ -1070,50 +1070,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
 
 
-    put:
-      operationId: updateUserExperience
-      tags:
-        - Experiencia
-      summary: Actualizar experiencia
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/InternalUserId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InternalExperienceRequest'
-      responses:
-        "200":
-          description: Experiencia actualizada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalExperienceResponse'
-        "400":
-          description: Datos de entrada inválidos
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-        "401":
-          description: Token no válido o ausente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-        "404":
-          description: Usuario no encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-
-
   # =========================
   # GAMES
   # =========================

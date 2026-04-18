@@ -31,6 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.david.xpup.backend.service.ExperienciaService;
 
 import java.time.LocalDateTime;
 
@@ -40,15 +41,18 @@ public class LikeServiceImpl implements LikeService {
     private final LikeRepository likeRepository;
     private final UsuarioRepository usuarioRepository;
     private final PublicacionRepository publicacionRepository;
+    private final ExperienciaService experienciaService;
 
     public LikeServiceImpl(
             LikeRepository likeRepository,
             UsuarioRepository usuarioRepository,
-            PublicacionRepository publicacionRepository
+            PublicacionRepository publicacionRepository,
+            ExperienciaService experienciaService
     ) {
         this.likeRepository = likeRepository;
         this.usuarioRepository = usuarioRepository;
         this.publicacionRepository = publicacionRepository;
+        this.experienciaService = experienciaService;
     }
 
     //Añade un like a una publicación -> POST /api/likes
@@ -89,6 +93,9 @@ public class LikeServiceImpl implements LikeService {
 
         //Guardamos el like en base de datos
         likeRepository.save(like);
+
+        //Añadimos experiencia al usuario por dar like
+        experienciaService.addExperienceForLike(usuario);
 
         //Construimos la respuesta de éxito
         MessageResponse response = new MessageResponse();

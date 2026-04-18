@@ -30,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.david.xpup.backend.service.ExperienciaService;
 
 import java.time.LocalDateTime;
 
@@ -44,6 +45,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     private final GuardadoRepository guardadoRepository;
     private final UsuarioMapper usuarioMapper;
     private final PublicacionMapper publicacionMapper;
+    private final ExperienciaService experienciaService;
 
     public PublicacionServiceImpl(
             PublicacionRepository publicacionRepository,
@@ -53,7 +55,8 @@ public class PublicacionServiceImpl implements PublicacionService {
             ComentarioRepository comentarioRepository,
             GuardadoRepository guardadoRepository,
             UsuarioMapper usuarioMapper,
-            PublicacionMapper publicacionMapper
+            PublicacionMapper publicacionMapper,
+            ExperienciaService experienciaService
     ) {
         this.publicacionRepository = publicacionRepository;
         this.usuarioRepository = usuarioRepository;
@@ -63,6 +66,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         this.guardadoRepository = guardadoRepository;
         this.usuarioMapper = usuarioMapper;
         this.publicacionMapper = publicacionMapper;
+        this.experienciaService = experienciaService;
     }
 
     //Crea una nueva publicación en el sistema -> POST /api/posts
@@ -98,6 +102,9 @@ public class PublicacionServiceImpl implements PublicacionService {
 
         //Guardamos la publicación en base de datos
         Publicacion publicacionGuardada = publicacionRepository.save(publicacion);
+
+        //Añadimos experiencia al usuario por crear una publicación
+        experienciaService.addExperienceForPost(usuario);
 
         //Construimos la respuesta de creación con el id generado
         InternalPostCreateResponse response = new InternalPostCreateResponse();

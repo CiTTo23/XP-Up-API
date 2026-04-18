@@ -34,6 +34,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.david.xpup.backend.service.ExperienciaService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,6 +48,7 @@ public class ComentarioServiceImpl implements ComentarioService {
     private final ExperienciaRepository experienciaRepository;
     private final UsuarioMapper usuarioMapper;
     private final ComentarioMapper comentarioMapper;
+    private final ExperienciaService experienciaService;
 
     public ComentarioServiceImpl(
             ComentarioRepository comentarioRepository,
@@ -54,7 +56,8 @@ public class ComentarioServiceImpl implements ComentarioService {
             PublicacionRepository publicacionRepository,
             ExperienciaRepository experienciaRepository,
             UsuarioMapper usuarioMapper,
-            ComentarioMapper comentarioMapper
+            ComentarioMapper comentarioMapper,
+            ExperienciaService experienciaService
     ) {
         this.comentarioRepository = comentarioRepository;
         this.usuarioRepository = usuarioRepository;
@@ -62,6 +65,7 @@ public class ComentarioServiceImpl implements ComentarioService {
         this.experienciaRepository = experienciaRepository;
         this.usuarioMapper = usuarioMapper;
         this.comentarioMapper = comentarioMapper;
+        this.experienciaService = experienciaService;
     }
 
     //Crea un comentario en una publicación -> POST /api/comments
@@ -98,6 +102,9 @@ public class ComentarioServiceImpl implements ComentarioService {
 
         //Guardamos el comentario en base de datos
         Comentario comentarioGuardado = comentarioRepository.save(comentario);
+
+        //Añadimos experiencia al usuario por comentar
+        experienciaService.addExperienceForComment(usuario);
 
         //Obtenemos la experiencia del autor para construir el resumen de usuario con nivel
         Experiencia experiencia = experienciaRepository.findByUsuario(usuario).orElse(null);
