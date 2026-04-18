@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 //creación de indices para mejorar el rendimiento en las consultas de seguidores y seguidos
 @Table(name = "seguimientos",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_seguimiento_seguidor_seguido", columnNames = {"id_seguidor", "id_seguido"})
+                @UniqueConstraint(name = "uk_seguimiento", columnNames = {"id_seguidor", "id_seguido"})
         },
         indexes = {
                 @Index(name = "idx_seguimiento_seguidor", columnList = "id_seguidor"),
