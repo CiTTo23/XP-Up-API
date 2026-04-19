@@ -1342,24 +1342,6 @@ components:
         - idSeguidor
         - idSeguido
 
-    InternalExperienceRequest:
-      type: object
-      description: Datos necesarios para actualizar la experiencia de un usuario.
-      properties:
-        xpTotal:
-          type: integer
-          description: Nueva cantidad total de experiencia acumulada del usuario.
-          minimum: 0
-          example: 150
-        nivel:
-          type: integer
-          description: Nuevo nivel calculado para el usuario.
-          minimum: 1
-          example: 4
-      required:
-        - xpTotal
-        - nivel
-
     InternalLikeCheckResponse:
       type: object
       description: Resultado de la comprobación de si un usuario ha dado like a una publicación.
@@ -1889,7 +1871,6 @@ components:
       required:
         - idJuegoApi
         - nombreJuego
-        - fechaLanzamiento
 
     ExternalGameListResponse:
       type: array
