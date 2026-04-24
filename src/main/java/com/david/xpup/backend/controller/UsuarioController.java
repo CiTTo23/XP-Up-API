@@ -28,8 +28,13 @@ public class UsuarioController implements UsuariosApi {
     }
 
     @Override
-    public ResponseEntity<InternalUserProfileResponse> updateUserProfile(Integer userId, @Valid InternalUserUpdateRequest internalUserUpdateRequest) {
-        return ResponseEntity.ok(usuarioService.updateUserProfile(userId, internalUserUpdateRequest));
+    public ResponseEntity<InternalUserProfileResponse> updateUserProfile(
+            Integer userId,
+            InternalUserUpdateRequest internalUserUpdateRequest
+    ) {
+        return ResponseEntity.ok(
+                usuarioService.updateUserProfile(userId, internalUserUpdateRequest)
+        );
     }
 
     @Override
