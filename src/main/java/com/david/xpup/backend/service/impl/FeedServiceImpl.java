@@ -81,10 +81,8 @@ public class FeedServiceImpl implements FeedService {
     //Obtiene el feed general paginado de publicaciones ordenado por fecha -> GET /api/feed
     @Override
     public InternalPagedPostResponse getFeed(String orden, Integer page, Integer size, String nombreJuego) {
-        //Obtenemos el usuario autenticado, necesario para calcular el estado de interacción con cada publicación
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
 
-        //Si no se reciben page o size, aplicamos valores por defecto
         int numeroPagina = page != null ? page : 0;
         int tamPagina = size != null ? size : 10;
 
@@ -92,21 +90,20 @@ public class FeedServiceImpl implements FeedService {
 
         Page<Publicacion> paginaPublicaciones;
 
-        //Si se recibe nombreJuego, filtramos el feed por ese videojuego
         if (nombreJuego != null && !nombreJuego.isBlank()) {
             paginaPublicaciones = publicacionRepository
-                    .findByNombreJuegoIgnoreCaseOrderByFechaPublicacionDesc(nombreJuego, pageable);
+                    .findByNombreJuegoContainingIgnoreCaseOrderByFechaPublicacionDesc(
+                            nombreJuego.trim(),
+                            pageable
+                    );
         } else {
-            //Si no se recibe filtro, devolvemos todas las publicaciones ordenadas por fecha descendente
             paginaPublicaciones = publicacionRepository.findAllByOrderByFechaPublicacionDesc(pageable);
         }
 
-        //Transformamos cada publicación en su DTO resumen enriquecido
         List<InternalPostSummaryResponse> publicacionesResponse = paginaPublicaciones.getContent().stream()
                 .map(publicacion -> mapToPostSummary(publicacion, usuarioAutenticado))
                 .toList();
 
-        //Construimos y devolvemos la respuesta paginada final
         return publicacionMapper.toPagedPostResponse(
                 publicacionesResponse,
                 paginaPublicaciones.getNumber(),
@@ -119,35 +116,28 @@ public class FeedServiceImpl implements FeedService {
     //Obtiene el feed paginado de publicaciones de usuarios seguidos ordenado por fecha -> GET /api/feed/following/{userId}
     @Override
     public InternalPagedPostResponse getFollowingFeed(Integer userId, String orden, Integer page, Integer size) {
-        //Buscamos el usuario del que se quiere obtener el feed de seguidos
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        //Obtenemos el usuario autenticado, necesario para calcular el estado de interacción con cada publicación
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
 
-        //Si no se reciben page o size, aplicamos valores por defecto
         int numeroPagina = page != null ? page : 0;
         int tamPagina = size != null ? size : 10;
 
         Pageable pageable = PageRequest.of(numeroPagina, tamPagina);
 
-        //Obtenemos la lista de usuarios seguidos por el usuario indicado
         List<Usuario> usuariosSeguidos = seguimientoRepository.findBySeguidorOrderByFechaSeguimientoDesc(usuario)
                 .stream()
                 .map(Seguimiento::getSeguido)
                 .toList();
 
-        //Recuperamos las publicaciones de esos usuarios ordenadas por fecha descendente
         Page<Publicacion> paginaPublicaciones = publicacionRepository
                 .findByUsuarioInOrderByFechaPublicacionDesc(usuariosSeguidos, pageable);
 
-        //Transformamos cada publicación en su DTO resumen enriquecido
         List<InternalPostSummaryResponse> publicacionesResponse = paginaPublicaciones.getContent().stream()
                 .map(publicacion -> mapToPostSummary(publicacion, usuarioAutenticado))
                 .toList();
 
-        //Construimos y devolvemos la respuesta paginada final
         return publicacionMapper.toPagedPostResponse(
                 publicacionesResponse,
                 paginaPublicaciones.getNumber(),
@@ -157,24 +147,18 @@ public class FeedServiceImpl implements FeedService {
         );
     }
 
-    //Construye el DTO resumen de una publicación añadiendo datos del autor, estadísticas y estado de interacción
     private InternalPostSummaryResponse mapToPostSummary(Publicacion publicacion, Usuario usuarioAutenticado) {
-        //Obtenemos el autor de la publicación
         Usuario autor = publicacion.getUsuario();
 
-        //Obtenemos la experiencia del autor para construir el resumen de usuario con nivel
         Experiencia experienciaAutor = experienciaRepository.findByUsuario(autor).orElse(null);
         InternalUserSummaryResponse usuarioResumen = usuarioMapper.toUserSummaryResponse(autor, experienciaAutor);
 
-        //Calculamos estadísticas básicas de la publicación
         long totalLikes = likeRepository.countByPublicacion(publicacion);
         long totalComentarios = comentarioRepository.countByPublicacion(publicacion);
 
-        //Calculamos el estado de interacción del usuario autenticado con la publicación
         boolean likedByUser = likeRepository.existsByUsuarioAndPublicacion(usuarioAutenticado, publicacion);
         boolean savedByUser = guardadoRepository.existsByUsuarioAndPublicacion(usuarioAutenticado, publicacion);
 
-        //Construimos y devolvemos el DTO resumen enriquecido
         return publicacionMapper.toPostSummaryResponse(
                 publicacion,
                 usuarioResumen,
@@ -185,7 +169,6 @@ public class FeedServiceImpl implements FeedService {
         );
     }
 
-    //Obtiene el usuario autenticado actual a partir del SecurityContext de Spring Security
     private Usuario getAuthenticatedUsuario() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

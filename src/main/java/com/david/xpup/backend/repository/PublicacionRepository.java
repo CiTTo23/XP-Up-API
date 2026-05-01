@@ -1,18 +1,18 @@
 /***********************************************************************************************************************
-*   Repositorio JPA para la gestión de publicaciones en la base de datos del proyecto                                  *
-*                                                                                                                      *
-*   Proporciona operaciones CRUD básicas heredadas de JpaRepository y métodos de consulta específicos                  *
-*   relacionados con la obtención y filtrado de publicaciones                                                          *
-*                                                                                                                      *
-*   Funcionalidades principales:                                                                                       *
-*       - Obtener las publicaciones de un usuario ordenadas por fecha descendente                                      *
-*       - Obtener el feed global paginado ordenado por fecha                                                           *
-*       - Filtrar publicaciones por nombre de juego                                                                    *
-*       - Obtener publicaciones de una lista de usuarios (feed de seguidos)                                            *
-*       - Filtrar el feed de seguidos por nombre de juego                                                              *
-*       - Contar cuántas publicaciones ha realizado un usuario                                                         *
-*                                                                                                                      *
-***********************************************************************************************************************/
+ *   Repositorio JPA para la gestión de publicaciones en la base de datos del proyecto                                  *
+ *                                                                                                                      *
+ *   Proporciona operaciones CRUD básicas heredadas de JpaRepository y métodos de consulta específicos                  *
+ *   relacionados con la obtención y filtrado de publicaciones                                                          *
+ *                                                                                                                      *
+ *   Funcionalidades principales:                                                                                       *
+ *       - Obtener las publicaciones de un usuario ordenadas por fecha descendente                                      *
+ *       - Obtener el feed global paginado ordenado por fecha                                                           *
+ *       - Filtrar publicaciones por nombre de juego de forma parcial                                                   *
+ *       - Obtener publicaciones de una lista de usuarios                                                               *
+ *       - Filtrar el feed de seguidos por nombre de juego de forma parcial                                             *
+ *       - Contar cuántas publicaciones ha realizado un usuario                                                         *
+ *                                                                                                                      *
+ ***********************************************************************************************************************/
 
 package com.david.xpup.backend.repository;
 
@@ -30,16 +30,21 @@ public interface PublicacionRepository extends JpaRepository<Publicacion, Intege
 
     Page<Publicacion> findAllByOrderByFechaPublicacionDesc(Pageable pageable);
 
-    Page<Publicacion> findByNombreJuegoIgnoreCaseOrderByFechaPublicacionDesc(String nombreJuego, Pageable pageable);
+    Page<Publicacion> findByNombreJuegoContainingIgnoreCaseOrderByFechaPublicacionDesc(
+            String nombreJuego,
+            Pageable pageable
+    );
 
-    Page<Publicacion> findByUsuarioInOrderByFechaPublicacionDesc(List<Usuario> usuarios, Pageable pageable);
+    Page<Publicacion> findByUsuarioInOrderByFechaPublicacionDesc(
+            List<Usuario> usuarios,
+            Pageable pageable
+    );
 
-    Page<Publicacion> findByUsuarioInAndNombreJuegoIgnoreCaseOrderByFechaPublicacionDesc(
+    Page<Publicacion> findByUsuarioInAndNombreJuegoContainingIgnoreCaseOrderByFechaPublicacionDesc(
             List<Usuario> usuarios,
             String nombreJuego,
             Pageable pageable
     );
 
     long countByUsuario(Usuario usuario);
-
 }
