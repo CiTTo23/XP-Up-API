@@ -26,5 +26,7 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Integer>
 
     List<Comentario> findByUsuario(Usuario usuario);
 
+    void deleteByPublicacion(Publicacion publicacion);
+
     long countByPublicacion(Publicacion publicacion);
 }

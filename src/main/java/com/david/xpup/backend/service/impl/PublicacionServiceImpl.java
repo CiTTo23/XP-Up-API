@@ -163,6 +163,11 @@ public class PublicacionServiceImpl implements PublicacionService {
             throw new UnauthorizedException("You do not have permission to delete this post.");
         }
 
+        //Eliminamos primero los registros relacionados para evitar errores de clave foránea
+        likeRepository.deleteByPublicacion(publicacion);
+        comentarioRepository.deleteByPublicacion(publicacion);
+        guardadoRepository.deleteByPublicacion(publicacion);
+
         //Eliminamos la publicación de BD
         publicacionRepository.delete(publicacion);
 

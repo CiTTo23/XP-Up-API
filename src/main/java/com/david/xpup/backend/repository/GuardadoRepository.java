@@ -37,6 +37,8 @@ public interface GuardadoRepository extends JpaRepository<Guardado, Integer> {
 
     long countByPublicacion(Publicacion publicacion);
 
+    void deleteByPublicacion(Publicacion publicacion);
+
     List<Guardado> findByUsuario(Usuario usuario);
 
 
