@@ -77,19 +77,19 @@ public class ComentarioServiceImpl implements ComentarioService {
 
         //Comprobamos que el usuario autenticado coincide con el usuario enviado en la request
         if (!usuarioAutenticado.getId().equals(request.getIdUsuario())) {
-            throw new UnauthorizedException("No tienes permisos para comentar en nombre de otro usuario");
+            throw new UnauthorizedException("You do not have permission to comment as another user.");
         }
 
         //Buscamos el usuario autor del comentario a partir del id recibido en la request
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + request.getIdUsuario()
+                        "User not found with id: " + request.getIdUsuario()
                 ));
 
         //Buscamos la publicación sobre la que se quiere comentar
         Publicacion publicacion = publicacionRepository.findById(request.getIdPublicacion())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + request.getIdPublicacion()
+                        "Post not found with id: " + request.getIdPublicacion()
                 ));
 
         //Construimos la entidad Comentario a partir del request recibido
@@ -119,7 +119,7 @@ public class ComentarioServiceImpl implements ComentarioService {
     public List<InternalCommentResponse> getCommentsByPost(Integer postId) {
         //Buscamos la publicación y lanzamos excepción 404 si no existe
         Publicacion publicacion = publicacionRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Publicación no encontrada con id: " + postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
 
         //Obtenemos todos los comentarios asociados a la publicación ordenados por fecha ascendente
         List<Comentario> comentarios = comentarioRepository.findByPublicacionOrderByFechaComentarioAsc(publicacion);
@@ -146,12 +146,12 @@ public class ComentarioServiceImpl implements ComentarioService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
-            throw new UnauthorizedException("Usuario no autenticado");
+            throw new UnauthorizedException("User is not authenticated.");
         }
 
         String nombreUsuario = authentication.getName();
 
         return usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found."));
     }
 }

@@ -121,7 +121,7 @@ public class FeedServiceImpl implements FeedService {
     public InternalPagedPostResponse getFollowingFeed(Integer userId, String orden, Integer page, Integer size) {
         //Buscamos el usuario del que se quiere obtener el feed de seguidos
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         //Obtenemos el usuario autenticado, necesario para calcular el estado de interacción con cada publicación
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
@@ -190,12 +190,12 @@ public class FeedServiceImpl implements FeedService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
-            throw new UnauthorizedException("Usuario no autenticado");
+            throw new UnauthorizedException("User is not authenticated.");
         }
 
         String nombreUsuario = authentication.getName();
 
         return usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found."));
     }
 }

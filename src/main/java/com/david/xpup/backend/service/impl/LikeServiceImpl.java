@@ -64,24 +64,24 @@ public class LikeServiceImpl implements LikeService {
 
         //Comprobamos que el usuario autenticado coincide con el usuario enviado en la request
         if (!usuarioAutenticado.getId().equals(request.getIdUsuario())) {
-            throw new UnauthorizedException("No tienes permisos para dar like en nombre de otro usuario");
+            throw new UnauthorizedException("You do not have permission to like posts as another user.");
         }
 
         //Buscamos el usuario que da like a partir del id recibido en la request
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + request.getIdUsuario()
+                        "User not found with id: " + request.getIdUsuario()
                 ));
 
         //Buscamos la publicación a la que se quiere dar like
         Publicacion publicacion = publicacionRepository.findById(request.getIdPublicacion())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + request.getIdPublicacion()
+                        "Post not found with id: " + request.getIdPublicacion()
                 ));
 
         //Comprobamos que el like no exista ya previamente
         if (likeRepository.existsByUsuarioAndPublicacion(usuario, publicacion)) {
-            throw new DuplicateResourceException("Ya has dado like a esta publicación");
+            throw new DuplicateResourceException("You have already liked this post.");
         }
 
         //Construimos la entidad Like a partir del usuario y la publicación
@@ -99,7 +99,7 @@ public class LikeServiceImpl implements LikeService {
 
         //Construimos la respuesta de éxito
         MessageResponse response = new MessageResponse();
-        response.setMensaje("Like añadido correctamente");
+        response.setMensaje("Like added successfully.");
 
         return response;
     }
@@ -114,24 +114,24 @@ public class LikeServiceImpl implements LikeService {
 
         //Comprobamos que el usuario autenticado coincide con el usuario enviado en la request
         if (!usuarioAutenticado.getId().equals(request.getIdUsuario())) {
-            throw new UnauthorizedException("No tienes permisos para quitar likes en nombre de otro usuario");
+            throw new UnauthorizedException("You do not have permission to remove likes as another user.");
         }
 
         //Buscamos el usuario que quiere quitar el like a partir del id recibido en la request
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + request.getIdUsuario()
+                        "User not found with id: " + request.getIdUsuario()
                 ));
 
         //Buscamos la publicación de la que se quiere quitar el like
         Publicacion publicacion = publicacionRepository.findById(request.getIdPublicacion())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + request.getIdPublicacion()
+                        "Post not found with id: " + request.getIdPublicacion()
                 ));
 
         //Comprobamos que el like exista antes de eliminarlo
         if (!likeRepository.existsByUsuarioAndPublicacion(usuario, publicacion)) {
-            throw new ResourceNotFoundException("No existe un like para ese usuario y publicación");
+            throw new ResourceNotFoundException("Like not found for this user and post.");
         }
 
         //Eliminamos el like de base de datos
@@ -139,7 +139,7 @@ public class LikeServiceImpl implements LikeService {
 
         //Construimos la respuesta de éxito
         MessageResponse response = new MessageResponse();
-        response.setMensaje("Like eliminado correctamente");
+        response.setMensaje("Like removed successfully.");
 
         return response;
     }
@@ -150,7 +150,7 @@ public class LikeServiceImpl implements LikeService {
         // Buscamos la publicación y lanzamos excepción 404 si no existe
         Publicacion publicacion = publicacionRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + postId
+                        "Post not found with id: " + postId
                 ));
 
         // Contamos los likes de la publicación
@@ -172,19 +172,19 @@ public class LikeServiceImpl implements LikeService {
 
         //Comprobamos que el usuario autenticado coincide con el usuario recibido
         if (!usuarioAutenticado.getId().equals(idUsuario)) {
-            throw new UnauthorizedException("No tienes permisos para consultar likes de otro usuario");
+            throw new UnauthorizedException("You do not have permission to check likes for another user.");
         }
 
         //Buscamos el usuario
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + idUsuario
+                        "User not found with id: " + idUsuario
                 ));
 
         //Buscamos la publicación
         Publicacion publicacion = publicacionRepository.findById(idPublicacion)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + idPublicacion
+                        "Post not found with id: " + idPublicacion
                 ));
 
         //Comprobamos si existe el like
@@ -202,12 +202,12 @@ public class LikeServiceImpl implements LikeService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
-            throw new UnauthorizedException("Usuario no autenticado");
+            throw new UnauthorizedException("User is not authenticated.");
         }
 
         String nombreUsuario = authentication.getName();
 
         return usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found."));
     }
 }

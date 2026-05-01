@@ -47,11 +47,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthRegisterResponse registerUser(AuthRegisterRequest request) {
         if (usuarioRepository.existsByNombreUsuario(request.getNombreUsuario())) {
-            throw new DuplicateResourceException("El nombre de usuario ya está en uso");
+            throw new DuplicateResourceException("Username is already in use.");
         }
 
         if (usuarioRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("El email ya está en uso");
+            throw new DuplicateResourceException("Email is already in use.");
         }
 
         Usuario usuario = Usuario.builder()
@@ -84,9 +84,9 @@ public class AuthServiceImpl implements AuthService {
                         request.getIdentificador(),
                         request.getIdentificador()
                 )
-                .orElseThrow(() -> new UnauthorizedException("Credenciales incorrectas"));
+                .orElseThrow(() -> new UnauthorizedException("Incorrect username/email or password."));
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
-            throw new UnauthorizedException("Credenciales incorrectas");
+            throw new UnauthorizedException("Incorrect username/email or password.");
         }
         String token = jwtService.generateToken(usuario.getId());
         AuthLoginResponse response = new AuthLoginResponse();
@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public MessageResponse logoutUser() {
         MessageResponse response = new MessageResponse();
-        response.setMensaje("Sesión cerrada correctamente");
+        response.setMensaje("Session closed successfully.");
         return response;
     }
 }

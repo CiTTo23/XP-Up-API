@@ -69,25 +69,25 @@ public class SeguimientoServiceImpl implements SeguimientoService {
 
         //Un usuario solo puede seguir en su propio nombre
         if (!usuarioAutenticado.getId().equals(request.getIdSeguidor())) {
-            throw new UnauthorizedException("No tienes permisos para seguir usuarios en nombre de otro");
+            throw new UnauthorizedException("You do not have permission to follow users as another user.");
         }
 
         //Un usuario no puede seguirse a sí mismo
         if (request.getIdSeguidor().equals(request.getIdSeguido())) {
-            throw new BadRequestException("Un usuario no puede seguirse a sí mismo");
+            throw new BadRequestException("You cannot follow yourself.");
         }
 
         //Buscamos al usuario que realiza el seguimiento
         Usuario seguidor = usuarioRepository.findById(request.getIdSeguidor())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario seguidor no encontrado con id: " + request.getIdSeguidor()));
+                .orElseThrow(() -> new ResourceNotFoundException("Follower user not found with id: " + request.getIdSeguidor()));
 
         //Buscamos al usuario que va a ser seguido
         Usuario seguido = usuarioRepository.findById(request.getIdSeguido())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario seguido no encontrado con id: " + request.getIdSeguido()));
+                .orElseThrow(() -> new ResourceNotFoundException("Followed user not found with id: " + request.getIdSeguido()));
 
         //Comprobamos que no exista ya esa relación de seguimiento
         if (seguimientoRepository.existsBySeguidorAndSeguido(seguidor, seguido)) {
-            throw new DuplicateResourceException("Ya sigues a este usuario");
+            throw new DuplicateResourceException("You already follow this user.");
         }
 
         //Creamos y guardamos el nuevo seguimiento
@@ -99,7 +99,7 @@ public class SeguimientoServiceImpl implements SeguimientoService {
 
         seguimientoRepository.save(seguimiento);
 
-        return seguimientoMapper.toMessageResponse("Usuario seguido correctamente");
+        return seguimientoMapper.toMessageResponse("User followed successfully.");
     }
 
 
@@ -112,27 +112,27 @@ public class SeguimientoServiceImpl implements SeguimientoService {
 
         //Un usuario solo puede dejar de seguir en su propio nombre
         if (!usuarioAutenticado.getId().equals(request.getIdSeguidor())) {
-            throw new UnauthorizedException("No tienes permisos para dejar de seguir usuarios en nombre de otro");
+            throw new UnauthorizedException("You do not have permission to unfollow users as another user.");
         }
 
         //Un usuario no puede dejar de seguirse a sí mismo
         if (request.getIdSeguidor().equals(request.getIdSeguido())) {
-            throw new BadRequestException("Un usuario no puede dejar de seguirse a sí mismo");
+            throw new BadRequestException("You cannot unfollow yourself.");
         }
 
         //Buscamos al usuario que realiza la acción
         Usuario seguidor = usuarioRepository.findById(request.getIdSeguidor())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario seguidor no encontrado con id: " + request.getIdSeguidor()));
+                .orElseThrow(() -> new ResourceNotFoundException("Follower user not found with id: " + request.getIdSeguidor()));
 
         //Buscamos al usuario que se quiere dejar de seguir
         Usuario seguido = usuarioRepository.findById(request.getIdSeguido())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario seguido no encontrado con id: " + request.getIdSeguido()));
+                .orElseThrow(() -> new ResourceNotFoundException("Followed user not found with id: " + request.getIdSeguido()));
 
         //Eliminamos la relación de seguimiento si existe
         seguimientoRepository.findBySeguidorAndSeguido(seguidor, seguido)
                 .ifPresent(seguimientoRepository::delete);
 
-        return seguimientoMapper.toMessageResponse("Usuario dejado de seguir correctamente");
+        return seguimientoMapper.toMessageResponse("User unfollowed successfully.");
     }
 
 
@@ -141,11 +141,11 @@ public class SeguimientoServiceImpl implements SeguimientoService {
     public InternalFollowCheckResponse checkUserFollow(Integer idSeguidor, Integer idSeguido) {
         //Buscamos al usuario seguidor
         Usuario seguidor = usuarioRepository.findById(idSeguidor)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario seguidor no encontrado con id: " + idSeguidor));
+                .orElseThrow(() -> new ResourceNotFoundException("Follower user not found with id: " + idSeguidor));
 
         //Buscamos al usuario seguido
         Usuario seguido = usuarioRepository.findById(idSeguido)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario seguido no encontrado con id: " + idSeguido));
+                .orElseThrow(() -> new ResourceNotFoundException("Followed user not found with id: " + idSeguido));
 
         //Comprobamos si existe relación de seguimiento entre ambos usuarios
         boolean following = seguimientoRepository.existsBySeguidorAndSeguido(seguidor, seguido);
@@ -159,7 +159,7 @@ public class SeguimientoServiceImpl implements SeguimientoService {
     public InternalFollowStatsResponse getFollowStats(Integer userId) {
         //Buscamos el usuario del que se quieren obtener las estadísticas
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         //Contamos seguidores y seguidos del usuario
         long totalSeguidores = seguimientoRepository.countBySeguido(usuario);
@@ -174,12 +174,12 @@ public class SeguimientoServiceImpl implements SeguimientoService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
-            throw new UnauthorizedException("Usuario no autenticado");
+            throw new UnauthorizedException("User is not authenticated.");
         }
 
         String nombreUsuario = authentication.getName();
 
         return usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found."));
     }
 }

@@ -61,24 +61,24 @@ public class GuardadoServiceImpl implements GuardadoService {
 
         //Comprobamos que el usuario autenticado coincide con el usuario enviado en la request
         if (!usuarioAutenticado.getId().equals(request.getIdUsuario())) {
-            throw new UnauthorizedException("No tienes permisos para guardar publicaciones en nombre de otro usuario");
+            throw new UnauthorizedException("You do not have permission to save posts as another user.");
         }
 
         //Buscamos el usuario que realiza el guardado
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + request.getIdUsuario()
+                        "User not found with id: " + request.getIdUsuario()
                 ));
 
         //Buscamos la publicación que se quiere guardar
         Publicacion publicacion = publicacionRepository.findById(request.getIdPublicacion())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + request.getIdPublicacion()
+                        "Post not found with id: " + request.getIdPublicacion()
                 ));
 
         //Comprobamos que no exista ya el guardado
         if (guardadoRepository.existsByUsuarioAndPublicacion(usuario, publicacion)) {
-            throw new DuplicateResourceException("Ya has guardado esta publicación");
+            throw new DuplicateResourceException("You have already saved this post.");
         }
 
         //Construimos la entidad Guardado a partir del usuario y la publicación
@@ -93,7 +93,7 @@ public class GuardadoServiceImpl implements GuardadoService {
 
         //Construimos la respuesta de éxito
         MessageResponse response = new MessageResponse();
-        response.setMensaje("Guardado añadido correctamente");
+        response.setMensaje("Post saved successfully.");
 
         return response;
     }
@@ -107,24 +107,24 @@ public class GuardadoServiceImpl implements GuardadoService {
 
         //Comprobamos que el usuario autenticado coincide con el usuario enviado en la request
         if (!usuarioAutenticado.getId().equals(request.getIdUsuario())) {
-            throw new UnauthorizedException("No tienes permisos para quitar guardados en nombre de otro usuario");
+            throw new UnauthorizedException("You do not have permission to unsave posts as another user.");
         }
 
         //Buscamos el usuario que quiere eliminar el guardado a partir del id recibido en la request
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + request.getIdUsuario()
+                        "User not found with id: " + request.getIdUsuario()
                 ));
 
         //Buscamos la publicación de la que se quiere quitar el guardado
         Publicacion publicacion = publicacionRepository.findById(request.getIdPublicacion())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + request.getIdPublicacion()
+                        "Post not found with id: " + request.getIdPublicacion()
                 ));
 
         //Comprobamos que el guardado exista antes de eliminarlo
         if (!guardadoRepository.existsByUsuarioAndPublicacion(usuario, publicacion)) {
-            throw new ResourceNotFoundException("No existe un guardado para ese usuario y publicación");
+            throw new ResourceNotFoundException("Saved post not found for this user and post.");
         }
 
         //Eliminamos el guardado de base de datos
@@ -132,7 +132,7 @@ public class GuardadoServiceImpl implements GuardadoService {
 
         //Construimos la respuesta de éxito
         MessageResponse response = new MessageResponse();
-        response.setMensaje("Guardado eliminado correctamente");
+        response.setMensaje("Post unsaved successfully.");
 
         return response;
     }
@@ -145,19 +145,19 @@ public class GuardadoServiceImpl implements GuardadoService {
 
         //Comprobamos que el usuario autenticado coincide con el usuario recibido
         if (!usuarioAutenticado.getId().equals(idUsuario)) {
-            throw new UnauthorizedException("No tienes permisos para consultar guardados de otro usuario");
+            throw new UnauthorizedException("You do not have permission to check saved posts for another user.");
         }
 
         //Buscamos el usuario
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + idUsuario
+                        "User not found with id: " + idUsuario
                 ));
 
         //Buscamos la publicación
         Publicacion publicacion = publicacionRepository.findById(idPublicacion)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Publicación no encontrada con id: " + idPublicacion
+                        "Post not found with id: " + idPublicacion
                 ));
 
         //Comprobamos si existe el guardado
@@ -175,12 +175,12 @@ public class GuardadoServiceImpl implements GuardadoService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
-            throw new UnauthorizedException("Usuario no autenticado");
+            throw new UnauthorizedException("User is not authenticated.");
         }
 
         String nombreUsuario = authentication.getName();
 
         return usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found."));
     }
 }

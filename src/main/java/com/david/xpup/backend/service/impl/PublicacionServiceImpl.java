@@ -77,13 +77,13 @@ public class PublicacionServiceImpl implements PublicacionService {
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
 
         if (!usuarioAutenticado.getId().equals(request.getIdUsuario())) {
-            throw new UnauthorizedException("No tienes permisos para crear publicaciones para otro usuario");
+            throw new UnauthorizedException("You do not have permission to create posts as another user.");
         }
 
         //Buscamos el usuario autor de la publicación a partir del id recibido en la request
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Usuario no encontrado con id: " + request.getIdUsuario()
+                        "User not found with id: " + request.getIdUsuario()
                 ));
 
         //Construimos la entidad Publicacion a partir del request recibido
@@ -109,7 +109,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         //Construimos la respuesta de creación con el id generado
         InternalPostCreateResponse response = new InternalPostCreateResponse();
         response.setId(publicacionGuardada.getId());
-        response.setMensaje("Publicación creada correctamente");
+        response.setMensaje("Post created successfully.");
 
         return response;
     }
@@ -118,7 +118,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     public InternalPostDetailResponse getPostById(Integer postId) {
         //Buscamos la publicación y lanzamos excepción 404 si no existe
         Publicacion publicacion = publicacionRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Publicación no encontrada con id: " + postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
 
         //Obtenemos el usuario autenticado, necesario para calcular el estado de interacción con la publicación
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
@@ -153,14 +153,14 @@ public class PublicacionServiceImpl implements PublicacionService {
     public MessageResponse deletePost(Integer postId) {
         //Buscamos la publicación y lanzamos excepción 404 si no existe
         Publicacion publicacion = publicacionRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Publicación no encontrada con id: " + postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
 
         //Obtenemos el usuario autenticado para comprobar permisos
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
 
         //Solo el autor de la publicación puede eliminarla
         if (!publicacion.getUsuario().getId().equals(usuarioAutenticado.getId())) {
-            throw new UnauthorizedException("No tienes permisos para eliminar esta publicación");
+            throw new UnauthorizedException("You do not have permission to delete this post.");
         }
 
         //Eliminamos la publicación de BD
@@ -168,7 +168,7 @@ public class PublicacionServiceImpl implements PublicacionService {
 
         //Construimos la respuesta de éxito
         MessageResponse response = new MessageResponse();
-        response.setMensaje("Publicación eliminada correctamente");
+        response.setMensaje("Post deleted successfully.");
 
         return response;
     }
@@ -178,12 +178,12 @@ public class PublicacionServiceImpl implements PublicacionService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
-            throw new UnauthorizedException("Usuario no autenticado");
+            throw new UnauthorizedException("User is not authenticated.");
         }
 
         String nombreUsuario = authentication.getName();
 
         return usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found."));
     }
 }

@@ -82,7 +82,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public InternalUserProfileResponse getUserProfile(Integer userId) {
         //Busca usuario y lanza excepcion 404 si no existe
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         return buildUserProfileResponse(usuario);
     }
@@ -95,14 +95,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
 
         if (!usuarioAutenticado.getId().equals(userId)) {
-            throw new UnauthorizedException("No tienes permisos para editar este perfil");
+            throw new UnauthorizedException("You do not have permission to edit this profile.");
         }
 
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         if (usuarioRepository.existsByNombreUsuarioAndIdNot(request.getNombreUsuario(), userId)) {
-            throw new DuplicateResourceException("El nombre de usuario ya está en uso");
+            throw new DuplicateResourceException("Username is already in use.");
         }
 
         usuario.setNombreUsuario(request.getNombreUsuario());
@@ -126,7 +126,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public List<InternalPostSummaryResponse> getUserPosts(Integer userId) {
         //Buscamos usuario del que se quieren ver las publicaciones
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         //Obtenemos el usuario autenticado, necesario para calcular el estado real de like y guardado
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
@@ -155,7 +155,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public List<InternalPostSummaryResponse> getUserLikedPosts(Integer userId) {
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
 
@@ -183,13 +183,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     public List<InternalPostSummaryResponse> getUserSavedPosts(Integer userId) {
         //Buscamos el usuario del que se quieren obtener las publicaciones guardadas
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         Usuario usuarioAutenticado = getAuthenticatedUsuario();
 
         //Un usuario solo podrá ver sus publicaciones guardadas, no las de los demás.
         if (!usuarioAutenticado.getId().equals(userId)) {
-            throw new UnauthorizedException("No tienes permisos para ver las publicaciones guardadas de este usuario");
+            throw new UnauthorizedException("You do not have permission to view this user's saved posts.");
         }
 
         List<Guardado> guardados = guardadoRepository.findByUsuarioOrderByFechaGuardadoDesc(usuario);
@@ -214,7 +214,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public List<InternalUserSummaryResponse> getUserFollowing(Integer userId) {
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         List<Seguimiento> seguimientos = seguimientoRepository.findBySeguidorOrderByFechaSeguimientoDesc(usuario);
 
@@ -232,7 +232,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public List<InternalUserSummaryResponse> getUserFollowers(Integer userId) {
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         List<Seguimiento> seguimientos = seguimientoRepository.findBySeguidoOrderByFechaSeguimientoDesc(usuario);
 
@@ -286,12 +286,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
-            throw new UnauthorizedException("Usuario no autenticado");
+            throw new UnauthorizedException("User is not authenticated.");
         }
 
         String nombreUsuario = authentication.getName();
 
         return usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found."));
     }
 }

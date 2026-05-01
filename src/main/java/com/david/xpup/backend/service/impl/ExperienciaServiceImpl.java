@@ -60,7 +60,7 @@ public class ExperienciaServiceImpl implements ExperienciaService {
     @Override
     public InternalExperienceResponse getUserExperience(Integer userId) {
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         Experiencia experiencia = experienciaRepository.findByUsuario(usuario).orElse(null);
 

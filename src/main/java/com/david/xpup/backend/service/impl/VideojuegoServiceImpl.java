@@ -48,7 +48,7 @@ public class VideojuegoServiceImpl implements VideojuegoService {
     public List<ExternalGameResponse> searchGames(String query) {
         //Validamos que el texto de búsqueda tenga contenido suficiente
         if (query == null || query.trim().length() < 2) {
-            throw new BadRequestException("El texto de búsqueda debe tener al menos 2 caracteres");
+            throw new BadRequestException("Search text must have at least 2 characters.");
         }
 
         //Construimos la URL de búsqueda contra RAWG
