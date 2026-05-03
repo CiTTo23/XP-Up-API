@@ -152,6 +152,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiError> handleForbidden(
+            ForbiddenException ex,
+            HttpServletRequest request
+    ) {
+        ApiError error = buildApiError(
+                HttpStatus.FORBIDDEN,
+                "Forbidden",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
     private ApiError buildApiError(
             HttpStatus status,
             String errorText,

@@ -1,18 +1,19 @@
 /***********************************************************************************************************************
-*   Implementación del Publicacion Service del sistema XP-Up                                                           *
-*                                                                                                                      *
-*   Esta clase contiene la lógica asociada a la creación, consulta y eliminación de publicaciones dentro de la         *
-*   plataforma                                                                                                         *
-*                                                                                                                      *
-*   Métodos principales:                                                                                               *
-*       - Crear una nueva publicación                                                                                  *
-*       - Obtener el detalle completo de una publicación                                                               *
-*       - Eliminar una publicación                                                                                     *
-*                                                                                                                      *
-*   Para ello, coordina diferentes repositorios del sistema y aplica validaciones de existencia y permisos            *
-*   antes de ejecutar operaciones sobre las publicaciones                                                              *
-*                                                                                                                      *
-***********************************************************************************************************************/
+ *   Implementación del Publicacion Service del sistema XP-Up                                                           *
+ *                                                                                                                      *
+ *   Esta clase contiene la lógica asociada a la creación, consulta, edición y eliminación de publicaciones dentro de   *
+ *   la plataforma                                                                                                      *
+ *                                                                                                                      *
+ *   Métodos principales:                                                                                               *
+ *       - Crear una nueva publicación                                                                                  *
+ *       - Obtener el detalle completo de una publicación                                                               *
+ *       - Editar una publicación existente                                                                             *
+ *       - Eliminar una publicación                                                                                     *
+ *                                                                                                                      *
+ *   Para ello, coordina diferentes repositorios del sistema y aplica validaciones de existencia y permisos            *
+ *   antes de ejecutar operaciones sobre las publicaciones                                                              *
+ *                                                                                                                      *
+ ***********************************************************************************************************************/
 
 package com.david.xpup.backend.service.impl;
 
@@ -176,6 +177,66 @@ public class PublicacionServiceImpl implements PublicacionService {
         response.setMensaje("Post deleted successfully.");
 
         return response;
+    }
+
+    //Actualiza los datos editables de una publicación -> PUT /api/posts/{postId}
+    @Transactional
+    @Override
+    public InternalPostDetailResponse updatePost(Integer postId, InternalPostUpdateRequest request) {
+        //Buscamos la publicación y lanzamos excepción 404 si no existe
+        Publicacion publicacion = publicacionRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
+
+        //Obtenemos el usuario autenticado para comprobar permisos
+        Usuario usuarioAutenticado = getAuthenticatedUsuario();
+
+        //Solo el autor de la publicación puede editarla
+        if (!publicacion.getUsuario().getId().equals(usuarioAutenticado.getId())) {
+            throw new UnauthorizedException("You do not have permission to edit this post.");
+        }
+
+        //Actualizamos los datos editables de la publicación
+        updatePostFields(publicacion, request);
+
+        //Guardamos la publicación actualizada en base de datos
+        Publicacion publicacionActualizada = publicacionRepository.save(publicacion);
+
+        //Obtenemos el autor de la publicación
+        Usuario autor = publicacionActualizada.getUsuario();
+
+        //Obtenemos la experiencia del autor para construir el resumen de usuario con nivel
+        Experiencia experienciaAutor = experienciaRepository.findByUsuario(autor).orElse(null);
+        InternalUserSummaryResponse usuarioResumen = usuarioMapper.toUserSummaryResponse(autor, experienciaAutor);
+
+        //Calculamos estadísticas e interacción del usuario autenticado con la publicación
+        long totalLikes = likeRepository.countByPublicacion(publicacionActualizada);
+        long totalComentarios = comentarioRepository.countByPublicacion(publicacionActualizada);
+        boolean likedByUser = likeRepository.existsByUsuarioAndPublicacion(usuarioAutenticado, publicacionActualizada);
+        boolean savedByUser = guardadoRepository.existsByUsuarioAndPublicacion(usuarioAutenticado, publicacionActualizada);
+
+        //Construimos y devolvemos el detalle completo de la publicación actualizada
+        return publicacionMapper.toPostDetailResponse(
+                publicacionActualizada,
+                usuarioResumen,
+                totalLikes,
+                totalComentarios,
+                likedByUser,
+                savedByUser
+        );
+    }
+
+    //Actualiza los campos editables de una publicación a partir de los datos recibidos en la request.
+    private void updatePostFields(
+            Publicacion publicacion,
+            InternalPostUpdateRequest request
+    ) {
+        publicacion.setTitulo(request.getTitulo());
+        publicacion.setDescripcion(request.getDescripcion());
+        publicacion.setNombreJuego(request.getNombreJuego());
+        publicacion.setIdJuegoApi(request.getIdJuegoApi());
+        publicacion.setPortadaJuegoUrl(request.getPortadaJuegoUrl());
+        publicacion.setArchivoUrl(request.getArchivoUrl());
+        publicacion.setMiniaturaUrl(request.getMiniaturaUrl());
     }
 
     //Obtiene el usuario autenticado actual a partir del SecurityContext de Spring Security

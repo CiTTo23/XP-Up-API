@@ -1,10 +1,7 @@
 package com.david.xpup.backend.mapper;
 
 import com.david.xpup.backend.entity.Publicacion;
-import com.david.xpup.generated.model.InternalPagedPostResponse;
-import com.david.xpup.generated.model.InternalPostDetailResponse;
-import com.david.xpup.generated.model.InternalPostSummaryResponse;
-import com.david.xpup.generated.model.InternalUserSummaryResponse;
+import com.david.xpup.generated.model.*;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneOffset;
@@ -63,6 +60,19 @@ public class PublicacionMapper {
         response.setLikedByUser(likedByUser);
         response.setSavedByUser(savedByUser);
         return response;
+    }
+
+    public void updatePublicacionFromRequest(
+            Publicacion publicacion,
+            InternalPostUpdateRequest request
+    ) {
+        publicacion.setTitulo(request.getTitulo());
+        publicacion.setDescripcion(request.getDescripcion());
+        publicacion.setNombreJuego(request.getNombreJuego());
+        publicacion.setIdJuegoApi(request.getIdJuegoApi());
+        publicacion.setPortadaJuegoUrl(request.getPortadaJuegoUrl());
+        publicacion.setArchivoUrl(request.getArchivoUrl());
+        publicacion.setMiniaturaUrl(request.getMiniaturaUrl());
     }
 
     public InternalPagedPostResponse toPagedPostResponse(
