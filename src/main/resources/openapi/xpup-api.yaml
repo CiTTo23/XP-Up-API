@@ -1474,6 +1474,10 @@ components:
           description: URL de la miniatura del contenido.
           maxLength: 255
           example: https://xpup.com/media/post25-thumb.jpg
+        idJuegoApi:
+          type: string
+          description: Identificador del videojuego en la API externa.
+          example: "12345"
         nombreJuego:
           type: string
           description: Nombre del juego asociado a la publicación.
@@ -1517,6 +1521,7 @@ components:
         - totalComentarios
         - likedByUser
         - savedByUser
+
 
     InternalUserSummaryResponse:
       type: object
@@ -1740,6 +1745,10 @@ components:
           type: string
           maxLength: 255
           example: https://xpup.com/media/post25-thumb.jpg
+        idJuegoApi:
+          type: string
+          description: Identificador del videojuego en la API externa.
+          example: "12345"
         nombreJuego:
           type: string
           example: Valorant
@@ -1776,6 +1785,7 @@ components:
         - totalComentarios
         - likedByUser
         - savedByUser
+
 
     InternalPostUpdateRequest:
       type: object

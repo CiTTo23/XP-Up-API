@@ -31,6 +31,7 @@ public class PublicacionMapper {
         response.setFechaPublicacion(publicacion.getFechaPublicacion().atOffset(ZoneOffset.UTC));
         response.setTotalLikes((int) totalLikes);
         response.setTotalComentarios((int) totalComentarios);
+        response.setIdJuegoApi(publicacion.getIdJuegoApi());
         response.setLikedByUser(likedByUser);
         response.setSavedByUser(savedByUser);
         return response;
@@ -57,6 +58,7 @@ public class PublicacionMapper {
         response.setFechaPublicacion(publicacion.getFechaPublicacion().atOffset(ZoneOffset.UTC));
         response.setTotalLikes((int) totalLikes);
         response.setTotalComentarios((int) totalComentarios);
+        response.setIdJuegoApi(publicacion.getIdJuegoApi());
         response.setLikedByUser(likedByUser);
         response.setSavedByUser(savedByUser);
         return response;
