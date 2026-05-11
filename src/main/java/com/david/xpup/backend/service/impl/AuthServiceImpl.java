@@ -1,11 +1,13 @@
 package com.david.xpup.backend.service.impl;
 
 import com.david.xpup.backend.entity.Experiencia;
+import com.david.xpup.backend.entity.SkinPerfil;
 import com.david.xpup.backend.entity.Usuario;
 import com.david.xpup.backend.exception.DuplicateResourceException;
 import com.david.xpup.backend.exception.UnauthorizedException;
 import com.david.xpup.backend.mapper.AuthMapper;
 import com.david.xpup.backend.repository.ExperienciaRepository;
+import com.david.xpup.backend.repository.SkinPerfilRepository;
 import com.david.xpup.backend.repository.UsuarioRepository;
 import com.david.xpup.backend.security.JwtService;
 import com.david.xpup.backend.service.AuthService;
@@ -23,8 +25,11 @@ import java.time.LocalDateTime;
 @Service
 public class AuthServiceImpl implements AuthService {
 
+    private static final String DEFAULT_SKIN_CODE = "DEFAULT";
+
     private final UsuarioRepository usuarioRepository;
     private final ExperienciaRepository experienciaRepository;
+    private final SkinPerfilRepository skinPerfilRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthMapper authMapper;
     private final JwtService jwtService;
@@ -32,12 +37,14 @@ public class AuthServiceImpl implements AuthService {
     public AuthServiceImpl(
             UsuarioRepository usuarioRepository,
             ExperienciaRepository experienciaRepository,
+            SkinPerfilRepository skinPerfilRepository,
             PasswordEncoder passwordEncoder,
             AuthMapper authMapper,
             JwtService jwtService
     ) {
         this.usuarioRepository = usuarioRepository;
         this.experienciaRepository = experienciaRepository;
+        this.skinPerfilRepository = skinPerfilRepository;
         this.passwordEncoder = passwordEncoder;
         this.authMapper = authMapper;
         this.jwtService = jwtService;
@@ -54,12 +61,16 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateResourceException("Email is already in use.");
         }
 
+        SkinPerfil skinDefault = skinPerfilRepository.findByCodigoAndActivaTrue(DEFAULT_SKIN_CODE)
+                .orElseThrow(() -> new IllegalStateException("Default profile skin not found."));
+
         Usuario usuario = Usuario.builder()
                 .nombreUsuario(request.getNombreUsuario())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fotoPerfil(null)
                 .biografia(null)
+                .skinPerfilActiva(skinDefault)
                 .fechaRegistro(LocalDateTime.now())
                 .rol("USER")
                 .build();
@@ -85,14 +96,18 @@ public class AuthServiceImpl implements AuthService {
                         request.getIdentificador()
                 )
                 .orElseThrow(() -> new UnauthorizedException("Incorrect username/email or password."));
+
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
             throw new UnauthorizedException("Incorrect username/email or password.");
         }
+
         String token = jwtService.generateToken(usuario.getId());
+
         AuthLoginResponse response = new AuthLoginResponse();
         response.setToken(token);
         response.setTokenType("Bearer");
         response.setUser(authMapper.toAuthUserResponse(usuario));
+
         return response;
     }
 

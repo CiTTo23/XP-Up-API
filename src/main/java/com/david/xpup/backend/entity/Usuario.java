@@ -1,20 +1,25 @@
 /***********************************************************************************************************************
-*   Entidad JPA que representa la tabla usuarios de la base de datos del proyecto                                      *
-*                                                                                                                      *
-*   Ejemplo de usuario en JSON:                                                                                        *
-*       {                                                                                                              *
-*           "id": 5,                                                                                                   *
-*           "nombreUsuario": "david23",                                                                                *
-*           "password": "$2a$10$abc123hashedpasswordexample", (password no se devuelve, solo ilustrativo)              *
-*           "email": "david23@example.com",                                                                            *
-*           "fotoPerfil": "https://example.com/foto.jpg",                                                              *
-*           "biografia": "Apasionado de los videojuegos y creador de contenido ",                                      *
-*           "fechaRegistro": "2026-04-01T12:00:00",                                                                    *
-*           "rol": "USER"                                                                                              *
-*       }                                                                                                              *
-*   Representa a un usuario registrado en la plataforma con sus datos personales y de autenticación                    *
-*                                                                                                                      *
-***********************************************************************************************************************/
+ *   Entidad JPA que representa la tabla usuarios de la base de datos del proyecto                                      *
+ *                                                                                                                      *
+ *   Ejemplo de usuario en JSON:                                                                                        *
+ *       {                                                                                                              *
+ *           "id": 5,                                                                                                   *
+ *           "nombreUsuario": "david23",                                                                                *
+ *           "password": "$2a$10$abc123hashedpasswordexample", (password no se devuelve, solo ilustrativo)              *
+ *           "email": "david23@example.com",                                                                            *
+ *           "fotoPerfil": "https://example.com/foto.jpg",                                                              *
+ *           "biografia": "Apasionado de los videojuegos y creador de contenido",                                      *
+ *           "skinPerfilActiva": {                                                                                      *
+ *               "id": 2,                                                                                               *
+ *               "codigo": "BRONZE",                                                                                    *
+ *               "nombre": "Bronce"                                                                                     *
+ *           },                                                                                                         *
+ *           "fechaRegistro": "2026-04-01T12:00:00",                                                                    *
+ *           "rol": "USER"                                                                                              *
+ *       }                                                                                                              *
+ *   Representa a un usuario registrado en la plataforma con sus datos personales, autenticación y skin de perfil activa *
+ *                                                                                                                      *
+ ***********************************************************************************************************************/
 
 package com.david.xpup.backend.entity;
 
@@ -55,6 +60,14 @@ public class Usuario {
 
     @Column(name = "biografia", columnDefinition = "TEXT")
     private String biografia;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "id_skin_perfil_activa",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_usuario_skin_perfil")
+    )
+    private SkinPerfil skinPerfilActiva;
 
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;

@@ -34,6 +34,8 @@ tags:
     description: Endpoints destinados a la gestión de la experiencia y nivel de los usuarios en el sistema XP-Up.
   - name: Videojuegos
     description: Endpoints destinados a la búsqueda y consulta de videojuegos desde una API externa.
+  - name: Skins
+    description: Endpoints destinados a la consulta y selección de skins desbloqueables para el perfil de usuario.
 
 
 paths:
@@ -1081,6 +1083,98 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
 
+
+  # =========================
+  # SKINS
+  # =========================
+
+  /api/users/{userId}/skins:
+    get:
+      operationId: getUserProfileSkins
+      tags:
+        - Skins
+      summary: Obtener skins de perfil de un usuario
+      description: Devuelve las skins de perfil disponibles, indicando cuáles están desbloqueadas según el nivel del usuario y cuál está equipada.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Lista de skins de perfil del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalUserProfileSkinListResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/users/{userId}/skin:
+    put:
+      operationId: updateUserProfileSkin
+      tags:
+        - Skins
+      summary: Cambiar skin activa del perfil
+      description: Permite cambiar la skin activa del perfil siempre que el usuario tenga nivel suficiente para desbloquearla.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalProfileSkinUpdateRequest'
+      responses:
+        "200":
+          description: Skin de perfil actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalUserProfileResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene nivel suficiente para desbloquear esta skin o no tiene permisos para modificar este perfil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario o skin no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+
+
   # =========================
   # EXPERIENCE
   # =========================
@@ -1187,7 +1281,7 @@ components:
 
     InternalUserProfileResponse:
       type: object
-      description: Información completa del perfil de un usuario incluyendo datos personales, progreso y estadísticas sociales.
+      description: Información completa del perfil de un usuario incluyendo datos personales, progreso, skin activa y estadísticas sociales.
       properties:
         id:
           $ref: '#/components/schemas/InternalUserId'
@@ -1230,6 +1324,8 @@ components:
           description: Nivel actual del usuario.
           minimum: 1
           example: 3
+        skinPerfil:
+          $ref: '#/components/schemas/InternalProfileSkinResponse'
         totalSeguidores:
           type: integer
           description: Número total de seguidores del usuario.
@@ -1253,6 +1349,7 @@ components:
         - fechaRegistro
         - xpTotal
         - nivel
+        - skinPerfil
         - totalSeguidores
         - totalSeguidos
         - totalPublicaciones
@@ -1994,3 +2091,132 @@ components:
       description: Lista de videojuegos obtenidos desde la API externa.
       items:
         $ref: '#/components/schemas/ExternalGameResponse'
+
+    InternalProfileSkinId:
+      type: integer
+      description: Identificador único de una skin de perfil.
+      minimum: 1
+      example: 2
+
+    InternalProfileSkinResponse:
+      type: object
+      description: Información de la skin activa de perfil de un usuario.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalProfileSkinId'
+        codigo:
+          type: string
+          description: Código único de la skin.
+          maxLength: 30
+          example: BRONZE
+        nombre:
+          type: string
+          description: Nombre visible de la skin.
+          maxLength: 50
+          example: Bronce
+        descripcion:
+          type: string
+          description: Descripción de la skin.
+          maxLength: 255
+          example: Tema desbloqueable con detalles metálicos en bronce.
+        nivelRequerido:
+          type: integer
+          description: Nivel mínimo necesario para desbloquear la skin.
+          minimum: 1
+          example: 5
+        fondoUrlOscuro:
+          type: string
+          nullable: true
+          description: URL del fondo usado en modo oscuro.
+          maxLength: 255
+          example: https://res.cloudinary.com/dq1e79vct/image/upload/v1778524660/ChatGPT_Image_11_may_2026_20_37_29_zymuwj.png
+        fondoUrlClaro:
+          type: string
+          nullable: true
+          description: URL del fondo usado en modo claro.
+          maxLength: 255
+          example: https://res.cloudinary.com/dq1e79vct/image/upload/v1778524720/ChatGPT_Image_11_may_2026_20_38_29_ylaspw.png
+        activa:
+          type: boolean
+          description: Indica si la skin está activa en el catálogo del sistema.
+          example: true
+      required:
+        - id
+        - codigo
+        - nombre
+        - nivelRequerido
+        - activa
+
+    InternalUserProfileSkinResponse:
+      type: object
+      description: Información de una skin de perfil junto con su estado para un usuario concreto.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalProfileSkinId'
+        codigo:
+          type: string
+          description: Código único de la skin.
+          maxLength: 30
+          example: BRONZE
+        nombre:
+          type: string
+          description: Nombre visible de la skin.
+          maxLength: 50
+          example: Bronce
+        descripcion:
+          type: string
+          description: Descripción de la skin.
+          maxLength: 255
+          example: Tema desbloqueable con detalles metálicos en bronce.
+        nivelRequerido:
+          type: integer
+          description: Nivel mínimo necesario para desbloquear la skin.
+          minimum: 1
+          example: 5
+        fondoUrlOscuro:
+          type: string
+          nullable: true
+          description: URL del fondo usado en modo oscuro.
+          maxLength: 255
+          example: https://res.cloudinary.com/dq1e79vct/image/upload/v1778524660/ChatGPT_Image_11_may_2026_20_37_29_zymuwj.png
+        fondoUrlClaro:
+          type: string
+          nullable: true
+          description: URL del fondo usado en modo claro.
+          maxLength: 255
+          example: https://res.cloudinary.com/dq1e79vct/image/upload/v1778524720/ChatGPT_Image_11_may_2026_20_38_29_ylaspw.png
+        activa:
+          type: boolean
+          description: Indica si la skin está activa en el catálogo del sistema.
+          example: true
+        desbloqueada:
+          type: boolean
+          description: Indica si el usuario tiene nivel suficiente para utilizar esta skin.
+          example: true
+        equipada:
+          type: boolean
+          description: Indica si esta skin es la skin actualmente equipada por el usuario.
+          example: false
+      required:
+        - id
+        - codigo
+        - nombre
+        - nivelRequerido
+        - activa
+        - desbloqueada
+        - equipada
+
+    InternalUserProfileSkinListResponse:
+      type: array
+      description: Lista de skins de perfil disponibles para un usuario.
+      items:
+        $ref: '#/components/schemas/InternalUserProfileSkinResponse'
+
+    InternalProfileSkinUpdateRequest:
+      type: object
+      description: Datos necesarios para seleccionar una skin de perfil.
+      properties:
+        idSkin:
+          $ref: '#/components/schemas/InternalProfileSkinId'
+      required:
+        - idSkin
