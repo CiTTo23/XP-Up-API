@@ -16,7 +16,11 @@
 package com.david.xpup.backend.repository;
 
 import com.david.xpup.backend.entity.Usuario;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -35,4 +39,20 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     boolean existsByNombreUsuarioAndIdNot(String nombreUsuario, Integer id);
 
     boolean existsByEmailAndIdNot(String email, Integer id);
+
+    long countByRol(String rol);
+
+    @Query("""
+            SELECT u
+            FROM Usuario u
+            WHERE (:query IS NULL
+                   OR LOWER(u.nombreUsuario) LIKE LOWER(CONCAT('%', :query, '%'))
+                   OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))
+              AND (:rol IS NULL OR u.rol = :rol)
+            """)
+    Page<Usuario> searchAdminUsers(
+            @Param("query") String query,
+            @Param("rol") String rol,
+            Pageable pageable
+    );
 }

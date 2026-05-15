@@ -36,7 +36,16 @@ tags:
     description: Endpoints destinados a la búsqueda y consulta de videojuegos desde una API externa.
   - name: Skins
     description: Endpoints destinados a la consulta y selección de skins desbloqueables para el perfil de usuario.
-
+  - name: AdminGeneral
+    description: Endpoints generales del panel de administración de XP-Up. Permiten consultar estadísticas globales y el histórico de operaciones administrativas.
+  - name: AdminUsers
+    description: Endpoints destinados a la consulta y gestión administrativa de usuarios dentro del panel de administración de XP-Up.
+  - name: AdminPosts
+    description: Endpoints destinados a la consulta, edición y moderación de publicaciones desde el panel de administración de XP-Up.
+  - name: AdminComments
+    description: Endpoints destinados a la consulta, edición y moderación de comentarios desde el panel de administración de XP-Up.
+  - name: Superadmin
+    description: Endpoints exclusivos para usuarios con rol SUPERADMIN. Permiten realizar operaciones críticas como modificar usuarios, eliminar usuarios y gestionar roles.
 
 paths:
   # =========================
@@ -1252,6 +1261,748 @@ paths:
                 $ref: '#/components/schemas/ApiError'
 
 
+  # =========================
+  # ADMIN - GENERAL
+  # =========================
+
+  /api/admin/stats:
+    get:
+      operationId: getAdminStats
+      tags:
+        - AdminGeneral
+      summary: Obtener estadísticas generales del sistema
+      description: Devuelve métricas generales de XP-Up para el dashboard del panel de administración. Requiere rol ADMIN o SUPERADMIN.
+      responses:
+        "200":
+          description: Estadísticas generales del sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStatsResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/admin/operations:
+    get:
+      operationId: getAdminOperations
+      tags:
+        - AdminGeneral
+      summary: Obtener histórico de operaciones administrativas
+      description: Devuelve las operaciones realizadas desde el panel de administración. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: tipoOperacion
+          in: query
+          required: false
+          description: Filtrar por tipo de operación administrativa.
+          schema:
+            type: string
+            example: ELIMINAR_PUBLICACION
+        - name: entidadAfectada
+          in: query
+          required: false
+          description: Filtrar por entidad afectada.
+          schema:
+            type: string
+            enum: [ USUARIO, PUBLICACION, COMENTARIO ]
+            example: PUBLICACION
+        - name: adminId
+          in: query
+          required: false
+          description: Filtrar por administrador que realizó la operación.
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+        - name: page
+          in: query
+          required: false
+          description: Número de página.
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - name: size
+          in: query
+          required: false
+          description: Número de elementos por página.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            example: 20
+      responses:
+        "200":
+          description: Lista paginada de operaciones administrativas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPagedOperationResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # ADMIN - USERS
+  # =========================
+
+  /api/admin/users:
+    get:
+      operationId: getAdminUsers
+      tags:
+        - AdminUsers
+      summary: Obtener listado paginado de usuarios
+      description: Permite consultar y filtrar usuarios desde el panel de administración. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: Texto de búsqueda por nombre de usuario o email.
+          schema:
+            type: string
+            minLength: 2
+            example: david
+        - name: rol
+          in: query
+          required: false
+          description: Filtrar usuarios por rol.
+          schema:
+            type: string
+            enum: [ USER, ADMIN, SUPERADMIN ]
+            example: USER
+        - name: page
+          in: query
+          required: false
+          description: Número de página.
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - name: size
+          in: query
+          required: false
+          description: Número de elementos por página.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            example: 20
+      responses:
+        "200":
+          description: Lista paginada de usuarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPagedUserResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/admin/users/{userId}:
+    get:
+      operationId: getAdminUserById
+      tags:
+        - AdminUsers
+      summary: Obtener detalle de usuario desde administración
+      description: Devuelve la información completa de un usuario para el panel de administración. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Detalle del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    patch:
+      operationId: updateAdminUser
+      tags:
+        - AdminUsers
+        - Superadmin
+      summary: Actualizar usuario desde administración
+      description: Permite modificar datos de un usuario desde el panel de administración. Requiere rol SUPERADMIN.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserUpdateRequest'
+      responses:
+        "200":
+          description: Usuario actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de superadministrador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "409":
+          description: Nombre de usuario o email ya en uso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      operationId: deleteAdminUser
+      tags:
+        - AdminUsers
+        - Superadmin
+      summary: Eliminar usuario desde administración
+      description: Permite eliminar un usuario y sus datos asociados. Requiere rol SUPERADMIN.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      responses:
+        "200":
+          description: Usuario eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "400":
+          description: No se puede eliminar el usuario indicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de superadministrador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/admin/users/{userId}/role:
+    patch:
+      operationId: updateAdminUserRole
+      tags:
+        - AdminUsers
+        - Superadmin
+      summary: Modificar rol de un usuario
+      description: Permite cambiar el rol de un usuario. Requiere rol SUPERADMIN.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserRoleUpdateRequest'
+      responses:
+        "200":
+          description: Rol actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserResponse'
+        "400":
+          description: Datos de entrada inválidos o cambio de rol no permitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de superadministrador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # =========================
+  # ADMIN - POSTS
+  # =========================
+
+  /api/admin/posts:
+    get:
+      operationId: getAdminPosts
+      tags:
+        - AdminPosts
+      summary: Obtener listado paginado de publicaciones
+      description: Permite consultar publicaciones del sistema para tareas de moderación. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: Texto de búsqueda por título, descripción o nombre del videojuego.
+          schema:
+            type: string
+            minLength: 2
+            example: valorant
+        - name: userId
+          in: query
+          required: false
+          description: Filtrar publicaciones por usuario.
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+        - name: page
+          in: query
+          required: false
+          description: Número de página.
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - name: size
+          in: query
+          required: false
+          description: Número de elementos por página.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            example: 20
+      responses:
+        "200":
+          description: Lista paginada de publicaciones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPagedPostResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/admin/posts/{postId}:
+    get:
+      operationId: getAdminPostById
+      tags:
+        - AdminPosts
+      summary: Obtener detalle de publicación desde administración
+      description: Devuelve el detalle de una publicación para revisión desde el panel de administración. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Detalle de publicación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPostResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Publicación no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    patch:
+      operationId: updateAdminPost
+      tags:
+        - AdminPosts
+      summary: Actualizar publicación desde administración
+      description: Permite modificar una publicación por motivos de moderación. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPostUpdateRequest'
+      responses:
+        "200":
+          description: Publicación actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPostResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Publicación no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      operationId: deleteAdminPost
+      tags:
+        - AdminPosts
+      summary: Eliminar publicación como administrador
+      description: Permite eliminar una publicación por motivos de moderación. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+      responses:
+        "200":
+          description: Publicación eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Publicación no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+
+  # =========================
+  # ADMIN - COMMENTS
+  # =========================
+
+  /api/admin/comments:
+    get:
+      operationId: getAdminComments
+      tags:
+        - AdminComments
+      summary: Obtener listado paginado de comentarios
+      description: Permite consultar comentarios del sistema para tareas de moderación. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: Texto de búsqueda en el contenido del comentario.
+          schema:
+            type: string
+            minLength: 2
+            example: buenísima
+        - name: postId
+          in: query
+          required: false
+          description: Filtrar comentarios por publicación.
+          schema:
+            $ref: '#/components/schemas/InternalPostId'
+        - name: userId
+          in: query
+          required: false
+          description: Filtrar comentarios por usuario.
+          schema:
+            $ref: '#/components/schemas/InternalUserId'
+        - name: page
+          in: query
+          required: false
+          description: Número de página.
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - name: size
+          in: query
+          required: false
+          description: Número de elementos por página.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            example: 20
+      responses:
+        "200":
+          description: Lista paginada de comentarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPagedCommentResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/admin/comments/{commentId}:
+    get:
+      operationId: getAdminCommentById
+      tags:
+        - AdminComments
+      summary: Obtener detalle de comentario desde administración
+      description: Devuelve el detalle de un comentario para revisión desde el panel de administración. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalCommentId'
+      responses:
+        "200":
+          description: Detalle de comentario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCommentResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Comentario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    patch:
+      operationId: updateAdminComment
+      tags:
+        - AdminComments
+      summary: Actualizar comentario desde administración
+      description: Permite modificar el contenido de un comentario por motivos de moderación. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalCommentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCommentUpdateRequest'
+      responses:
+        "200":
+          description: Comentario actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCommentResponse'
+        "400":
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Comentario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    delete:
+      operationId: deleteAdminComment
+      tags:
+        - AdminComments
+      summary: Eliminar comentario como administrador
+      description: Permite eliminar un comentario por motivos de moderación. Requiere rol ADMIN o SUPERADMIN.
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InternalCommentId'
+      responses:
+        "200":
+          description: Comentario eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        "401":
+          description: Token no válido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: El usuario no tiene permisos de administración
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "404":
+          description: Comentario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
 # =========================
 # COMPONENTS (DTOs)
 # =========================
@@ -2220,3 +2971,488 @@ components:
           $ref: '#/components/schemas/InternalProfileSkinId'
       required:
         - idSkin
+
+    InternalCommentId:
+      type: integer
+      description: Identificador único de un comentario dentro del sistema.
+      minimum: 1
+      example: 101
+
+    AdminStatsResponse:
+      type: object
+      description: Estadísticas generales del sistema para el panel de administración.
+      properties:
+        totalUsuarios:
+          type: integer
+          minimum: 0
+          example: 120
+        totalPublicaciones:
+          type: integer
+          minimum: 0
+          example: 340
+        totalComentarios:
+          type: integer
+          minimum: 0
+          example: 890
+        totalLikes:
+          type: integer
+          minimum: 0
+          example: 2500
+        totalGuardados:
+          type: integer
+          minimum: 0
+          example: 430
+        totalSeguimientos:
+          type: integer
+          minimum: 0
+          example: 700
+        totalOperacionesAdmin:
+          type: integer
+          minimum: 0
+          example: 18
+      required:
+        - totalUsuarios
+        - totalPublicaciones
+        - totalComentarios
+        - totalLikes
+        - totalGuardados
+        - totalSeguimientos
+        - totalOperacionesAdmin
+
+    AdminOperationResponse:
+      type: object
+      description: Información de una operación administrativa registrada en el sistema.
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 1
+        adminId:
+          type: integer
+          nullable: true
+          minimum: 1
+          example: 3
+        nombreAdmin:
+          type: string
+          nullable: true
+          maxLength: 20
+          example: david_admin
+        emailAdmin:
+          type: string
+          nullable: true
+          format: email
+          maxLength: 50
+          example: admin@xpup.com
+        tipoOperacion:
+          type: string
+          example: ELIMINAR_PUBLICACION
+        entidadAfectada:
+          type: string
+          enum: [ USUARIO, PUBLICACION, COMENTARIO ]
+          example: PUBLICACION
+        idEntidadAfectada:
+          type: integer
+          nullable: true
+          example: 25
+        detalle:
+          type: string
+          nullable: true
+          maxLength: 500
+          example: Publicación eliminada desde el panel de administración
+        fechaOperacion:
+          type: string
+          format: date-time
+          example: 2026-05-15T12:30:00
+      required:
+        - id
+        - tipoOperacion
+        - entidadAfectada
+        - fechaOperacion
+
+    AdminPagedOperationResponse:
+      type: object
+      description: Resultado paginado del histórico de operaciones administrativas.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminOperationResponse'
+        page:
+          type: integer
+          minimum: 0
+          example: 0
+        size:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 20
+        totalElements:
+          type: integer
+          minimum: 0
+          example: 18
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 1
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+
+    AdminUserResponse:
+      type: object
+      description: Información de un usuario para el panel de administración.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalUserId'
+        nombreUsuario:
+          type: string
+          example: david_pro
+        email:
+          type: string
+          format: email
+          maxLength: 50
+          example: david@gmail.com
+        fotoPerfil:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: https://xpup.com/img/perfil1.jpg
+        biografia:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: Jugador competitivo de shooters
+        rol:
+          type: string
+          enum: [ USER, ADMIN, SUPERADMIN ]
+          example: USER
+        fechaRegistro:
+          type: string
+          format: date-time
+          example: 2026-04-12T10:30:00
+        xpTotal:
+          type: integer
+          minimum: 0
+          example: 250
+        nivel:
+          type: integer
+          minimum: 1
+          example: 4
+        totalPublicaciones:
+          type: integer
+          minimum: 0
+          example: 12
+        totalSeguidores:
+          type: integer
+          minimum: 0
+          example: 5
+        totalSeguidos:
+          type: integer
+          minimum: 0
+          example: 8
+      required:
+        - id
+        - nombreUsuario
+        - email
+        - rol
+        - fechaRegistro
+        - xpTotal
+        - nivel
+        - totalPublicaciones
+        - totalSeguidores
+        - totalSeguidos
+
+    AdminPagedUserResponse:
+      type: object
+      description: Resultado paginado de usuarios para el panel de administración.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminUserResponse'
+        page:
+          type: integer
+          minimum: 0
+          example: 0
+        size:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 20
+        totalElements:
+          type: integer
+          minimum: 0
+          example: 120
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 6
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+
+    AdminUserUpdateRequest:
+      type: object
+      description: Datos modificables de un usuario desde el panel de administración.
+      properties:
+        nombreUsuario:
+          type: string
+          description: Nombre de usuario.
+          minLength: 3
+          maxLength: 20
+          pattern: "^[a-zA-Z0-9._]+$"
+          example: david_pro
+        email:
+          type: string
+          description: Correo electrónico del usuario.
+          format: email
+          maxLength: 50
+          example: david@gmail.com
+        fotoPerfil:
+          type: string
+          nullable: true
+          description: URL de la imagen de perfil.
+          maxLength: 255
+          example: https://xpup.com/img/perfil1.jpg
+        biografia:
+          type: string
+          nullable: true
+          description: Biografía del usuario.
+          maxLength: 255
+          example: Jugador competitivo de shooters
+
+    AdminUserRoleUpdateRequest:
+      type: object
+      description: Datos necesarios para modificar el rol de un usuario desde el panel de administración.
+      properties:
+        rol:
+          type: string
+          enum: [ USER, ADMIN, SUPERADMIN ]
+          example: ADMIN
+      required:
+        - rol
+
+    AdminPostResponse:
+      type: object
+      description: Información de una publicación para el panel de administración.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalPostId'
+        usuario:
+          $ref: '#/components/schemas/InternalUserSummaryResponse'
+        titulo:
+          type: string
+          example: Mi clutch en Valorant
+        descripcion:
+          type: string
+          example: Ace increíble
+        tipoContenido:
+          type: string
+          example: VIDEO
+        archivoUrl:
+          type: string
+          maxLength: 255
+          example: https://xpup.com/media/post25.mp4
+        miniaturaUrl:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: https://xpup.com/media/post25-thumb.jpg
+        idJuegoApi:
+          type: string
+          example: "12345"
+        nombreJuego:
+          type: string
+          example: Valorant
+        portadaJuegoUrl:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: https://xpup.com/games/valorant.jpg
+        fechaPublicacion:
+          type: string
+          format: date-time
+          example: 2026-04-05T12:00:00
+        totalLikes:
+          type: integer
+          minimum: 0
+          example: 18
+        totalComentarios:
+          type: integer
+          minimum: 0
+          example: 5
+        totalGuardados:
+          type: integer
+          minimum: 0
+          example: 3
+      required:
+        - id
+        - usuario
+        - titulo
+        - tipoContenido
+        - archivoUrl
+        - fechaPublicacion
+        - totalLikes
+        - totalComentarios
+        - totalGuardados
+
+    AdminPagedPostResponse:
+      type: object
+      description: Resultado paginado de publicaciones para moderación.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminPostResponse'
+        page:
+          type: integer
+          minimum: 0
+          example: 0
+        size:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 20
+        totalElements:
+          type: integer
+          minimum: 0
+          example: 340
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 17
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+
+    AdminPostUpdateRequest:
+      type: object
+      description: Datos modificables de una publicación desde el panel de administración.
+      properties:
+        titulo:
+          type: string
+          description: Título de la publicación.
+          minLength: 1
+          maxLength: 75
+          example: Mi clutch editado en Valorant
+        descripcion:
+          type: string
+          description: Descripción del contenido.
+          maxLength: 2000
+          example: Publicación editada por moderación
+        tipoContenido:
+          type: string
+          enum: [ VIDEO, IMAGEN ]
+          description: Tipo de contenido de la publicación.
+          example: VIDEO
+        idJuegoApi:
+          type: string
+          description: Identificador del videojuego en la API externa.
+          minLength: 1
+          maxLength: 50
+          example: "12345"
+        nombreJuego:
+          type: string
+          description: Nombre del videojuego.
+          minLength: 1
+          maxLength: 50
+          example: Valorant
+        portadaJuegoUrl:
+          type: string
+          nullable: true
+          description: URL de la portada del videojuego.
+          maxLength: 255
+          example: https://xpup.com/games/valorant.jpg
+        archivoUrl:
+          type: string
+          description: URL del archivo multimedia principal.
+          maxLength: 255
+          example: https://xpup.com/media/post25.mp4
+        miniaturaUrl:
+          type: string
+          nullable: true
+          description: URL de la miniatura.
+          maxLength: 255
+          example: https://xpup.com/media/post25-thumb.jpg
+
+    AdminCommentResponse:
+      type: object
+      description: Información de un comentario para moderación desde el panel de administración.
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalCommentId'
+        usuario:
+          $ref: '#/components/schemas/InternalUserSummaryResponse'
+        postId:
+          $ref: '#/components/schemas/InternalPostId'
+        postTitulo:
+          type: string
+          example: Mi clutch en Valorant
+        contenido:
+          type: string
+          maxLength: 1000
+          example: Buenísima jugada
+        fechaComentario:
+          type: string
+          format: date-time
+          example: 2026-04-12T11:30:00
+      required:
+        - id
+        - usuario
+        - postId
+        - contenido
+        - fechaComentario
+
+    AdminPagedCommentResponse:
+      type: object
+      description: Resultado paginado de comentarios para moderación.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCommentResponse'
+        page:
+          type: integer
+          minimum: 0
+          example: 0
+        size:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 20
+        totalElements:
+          type: integer
+          minimum: 0
+          example: 890
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 45
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+
+    AdminCommentUpdateRequest:
+      type: object
+      description: Datos modificables de un comentario desde el panel de administración.
+      properties:
+        contenido:
+          type: string
+          description: Nuevo contenido del comentario.
+          minLength: 1
+          maxLength: 1000
+          example: Comentario editado por moderación
+      required:
+        - contenido
