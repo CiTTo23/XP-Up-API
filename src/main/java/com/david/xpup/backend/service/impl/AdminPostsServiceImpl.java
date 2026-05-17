@@ -222,15 +222,22 @@ public class AdminPostsServiceImpl implements AdminPostsService {
                 + " | Autor: "
                 + publicacion.getUsuario().getNombreUsuario();
 
+        // Primero eliminamos relaciones hijas para evitar errores de FK
+        comentarioRepository.deleteByPublicacion(publicacion);
+        likeRepository.deleteByPublicacion(publicacion);
+        guardadoRepository.deleteByPublicacion(publicacion);
+
+        // Después eliminamos la publicación
+        publicacionRepository.delete(publicacion);
+
+        // Finalmente registramos la operación administrativa
         adminAuditService.registrarOperacion(
                 admin,
                 OPERACION_ELIMINAR_PUBLICACION,
                 ENTIDAD_PUBLICACION,
-                publicacion.getId(),
+                postId,
                 detalle
         );
-
-        publicacionRepository.delete(publicacion);
 
         MessageResponse response = new MessageResponse();
         response.setMensaje("Publicación eliminada correctamente");
