@@ -38,4 +38,6 @@ public interface SeguimientoRepository extends JpaRepository<Seguimiento, Intege
     long countBySeguido(Usuario seguido);
 
     long countBySeguidor(Usuario seguidor);
+
+    void deleteBySeguidorOrSeguido(Usuario seguidor, Usuario seguido);
 }

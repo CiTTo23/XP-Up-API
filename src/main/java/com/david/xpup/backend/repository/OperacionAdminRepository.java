@@ -5,9 +5,11 @@
 package com.david.xpup.backend.repository;
 
 import com.david.xpup.backend.entity.OperacionAdmin;
+import com.david.xpup.backend.entity.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +28,12 @@ public interface OperacionAdminRepository extends JpaRepository<OperacionAdmin, 
             @Param("adminId") Integer adminId,
             Pageable pageable
     );
+
+    @Modifying
+    @Query("""
+        UPDATE OperacionAdmin o
+        SET o.admin = null
+        WHERE o.admin = :usuario
+        """)
+    void desvincularAdminDeOperaciones(@Param("usuario") Usuario usuario);
 }

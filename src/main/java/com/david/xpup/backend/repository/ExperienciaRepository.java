@@ -23,4 +23,6 @@ public interface ExperienciaRepository extends JpaRepository<Experiencia, Intege
     Optional<Experiencia> findByUsuario(Usuario usuario);
 
     boolean existsByUsuario(Usuario usuario);
+
+    void deleteByUsuario(Usuario usuario);
 }

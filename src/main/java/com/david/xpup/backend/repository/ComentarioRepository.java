@@ -50,4 +50,8 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Integer>
             @Param("userId") Integer userId,
             Pageable pageable
     );
+
+    void deleteByUsuario(Usuario usuario);
+
+    void deleteByPublicacionIn(List<Publicacion> publicaciones);
 }

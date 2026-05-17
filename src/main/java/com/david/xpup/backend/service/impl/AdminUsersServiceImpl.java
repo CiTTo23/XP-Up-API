@@ -21,16 +21,14 @@
 package com.david.xpup.backend.service.impl;
 
 import com.david.xpup.backend.entity.Experiencia;
+import com.david.xpup.backend.entity.Publicacion;
 import com.david.xpup.backend.entity.Usuario;
 import com.david.xpup.backend.exception.BadRequestException;
 import com.david.xpup.backend.exception.DuplicateResourceException;
 import com.david.xpup.backend.exception.ResourceNotFoundException;
 import com.david.xpup.backend.exception.UnauthorizedException;
 import com.david.xpup.backend.mapper.AdminMapper;
-import com.david.xpup.backend.repository.ExperienciaRepository;
-import com.david.xpup.backend.repository.PublicacionRepository;
-import com.david.xpup.backend.repository.SeguimientoRepository;
-import com.david.xpup.backend.repository.UsuarioRepository;
+import com.david.xpup.backend.repository.*;
 import com.david.xpup.backend.service.AdminAuditService;
 import com.david.xpup.backend.service.AdminUsersService;
 import com.david.xpup.generated.model.AdminPagedUserResponse;
@@ -70,6 +68,10 @@ public class AdminUsersServiceImpl implements AdminUsersService {
     private final PublicacionRepository publicacionRepository;
     private final SeguimientoRepository seguimientoRepository;
     private final AdminAuditService adminAuditService;
+    private final LikeRepository likeRepository;
+    private final GuardadoRepository guardadoRepository;
+    private final ComentarioRepository comentarioRepository;
+    private final OperacionAdminRepository operacionAdminRepository;
     private final AdminMapper adminMapper;
 
     public AdminUsersServiceImpl(
@@ -77,6 +79,10 @@ public class AdminUsersServiceImpl implements AdminUsersService {
             ExperienciaRepository experienciaRepository,
             PublicacionRepository publicacionRepository,
             SeguimientoRepository seguimientoRepository,
+            LikeRepository likeRepository,
+            GuardadoRepository guardadoRepository,
+            ComentarioRepository comentarioRepository,
+            OperacionAdminRepository operacionAdminRepository,
             AdminAuditService adminAuditService,
             AdminMapper adminMapper
     ) {
@@ -84,6 +90,10 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         this.experienciaRepository = experienciaRepository;
         this.publicacionRepository = publicacionRepository;
         this.seguimientoRepository = seguimientoRepository;
+        this.likeRepository = likeRepository;
+        this.guardadoRepository = guardadoRepository;
+        this.comentarioRepository = comentarioRepository;
+        this.operacionAdminRepository = operacionAdminRepository;
         this.adminAuditService = adminAuditService;
         this.adminMapper = adminMapper;
     }
@@ -203,6 +213,24 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         String detalle = "Usuario eliminado desde el panel de administración: "
                 + usuario.getNombreUsuario()
                 + " (" + usuario.getEmail() + ")";
+
+        List<Publicacion> publicacionesUsuario =
+                publicacionRepository.findByUsuarioOrderByFechaPublicacionDesc(usuario);
+
+        if (!publicacionesUsuario.isEmpty()) {
+            likeRepository.deleteByPublicacionIn(publicacionesUsuario);
+            guardadoRepository.deleteByPublicacionIn(publicacionesUsuario);
+            comentarioRepository.deleteByPublicacionIn(publicacionesUsuario);
+            publicacionRepository.deleteAll(publicacionesUsuario);
+        }
+
+        likeRepository.deleteByUsuario(usuario);
+        guardadoRepository.deleteByUsuario(usuario);
+        comentarioRepository.deleteByUsuario(usuario);
+        seguimientoRepository.deleteBySeguidorOrSeguido(usuario, usuario);
+        experienciaRepository.deleteByUsuario(usuario);
+
+        operacionAdminRepository.desvincularAdminDeOperaciones(usuario);
 
         adminAuditService.registrarOperacion(
                 admin,
