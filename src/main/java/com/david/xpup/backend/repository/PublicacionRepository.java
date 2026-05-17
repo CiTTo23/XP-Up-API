@@ -21,6 +21,8 @@ import com.david.xpup.backend.entity.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -46,5 +48,21 @@ public interface PublicacionRepository extends JpaRepository<Publicacion, Intege
             Pageable pageable
     );
 
+
     long countByUsuario(Usuario usuario);
+
+    @Query("""
+            SELECT p
+            FROM Publicacion p
+            WHERE (:query IS NULL
+                OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(p.nombreJuego) LIKE LOWER(CONCAT('%', :query, '%')))
+              AND (:userId IS NULL OR p.usuario.id = :userId)
+            """)
+    Page<Publicacion> searchAdminPosts(
+            @Param("query") String query,
+            @Param("userId") Integer userId,
+            Pageable pageable
+    );
 }

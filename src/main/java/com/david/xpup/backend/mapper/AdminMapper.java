@@ -10,13 +10,8 @@
 
 package com.david.xpup.backend.mapper;
 
-import com.david.xpup.backend.entity.Experiencia;
-import com.david.xpup.backend.entity.OperacionAdmin;
-import com.david.xpup.backend.entity.Usuario;
-import com.david.xpup.generated.model.AdminOperationResponse;
-import com.david.xpup.generated.model.AdminPagedOperationResponse;
-import com.david.xpup.generated.model.AdminPagedUserResponse;
-import com.david.xpup.generated.model.AdminUserResponse;
+import com.david.xpup.backend.entity.*;
+import com.david.xpup.generated.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -98,6 +93,79 @@ public class AdminMapper {
         AdminPagedOperationResponse response = new AdminPagedOperationResponse();
 
         response.setContent(operations);
+        response.setPage(page.getNumber());
+        response.setSize(page.getSize());
+        response.setTotalElements((int) page.getTotalElements());
+        response.setTotalPages(page.getTotalPages());
+
+        return response;
+    }
+
+    public AdminPostResponse toAdminPostResponse(
+            Publicacion publicacion,
+            InternalUserSummaryResponse usuarioResumen,
+            long totalLikes,
+            long totalComentarios,
+            long totalGuardados
+    ) {
+        AdminPostResponse response = new AdminPostResponse();
+
+        response.setId(publicacion.getId());
+        response.setUsuario(usuarioResumen);
+        response.setTitulo(publicacion.getTitulo());
+        response.setDescripcion(publicacion.getDescripcion());
+        response.setTipoContenido(publicacion.getTipoContenido());
+        response.setArchivoUrl(publicacion.getArchivoUrl());
+        response.setMiniaturaUrl(publicacion.getMiniaturaUrl());
+        response.setIdJuegoApi(publicacion.getIdJuegoApi());
+        response.setNombreJuego(publicacion.getNombreJuego());
+        response.setPortadaJuegoUrl(publicacion.getPortadaJuegoUrl());
+        response.setFechaPublicacion(publicacion.getFechaPublicacion().atOffset(ZoneOffset.UTC));
+        response.setTotalLikes((int) totalLikes);
+        response.setTotalComentarios((int) totalComentarios);
+        response.setTotalGuardados((int) totalGuardados);
+
+        return response;
+    }
+
+    public AdminPagedPostResponse toAdminPagedPostResponse(
+            List<AdminPostResponse> posts,
+            Page<Publicacion> page
+    ) {
+        AdminPagedPostResponse response = new AdminPagedPostResponse();
+
+        response.setContent(posts);
+        response.setPage(page.getNumber());
+        response.setSize(page.getSize());
+        response.setTotalElements((int) page.getTotalElements());
+        response.setTotalPages(page.getTotalPages());
+
+        return response;
+    }
+
+    public AdminCommentResponse toAdminCommentResponse(
+            Comentario comentario,
+            InternalUserSummaryResponse usuarioResumen
+    ) {
+        AdminCommentResponse response = new AdminCommentResponse();
+
+        response.setId(comentario.getId());
+        response.setUsuario(usuarioResumen);
+        response.setPostId(comentario.getPublicacion().getId());
+        response.setPostTitulo(comentario.getPublicacion().getTitulo());
+        response.setContenido(comentario.getContenido());
+        response.setFechaComentario(comentario.getFechaComentario().atOffset(ZoneOffset.UTC));
+
+        return response;
+    }
+
+    public AdminPagedCommentResponse toAdminPagedCommentResponse(
+            List<AdminCommentResponse> comments,
+            Page<Comentario> page
+    ) {
+        AdminPagedCommentResponse response = new AdminPagedCommentResponse();
+
+        response.setContent(comments);
         response.setPage(page.getNumber());
         response.setSize(page.getSize());
         response.setTotalElements((int) page.getTotalElements());
